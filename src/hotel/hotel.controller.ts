@@ -46,6 +46,7 @@ const storage = {
     },
   }),
 };
+
 @ApiTags('Hotel')
 @Controller('hotel')
 export class HotelController {
@@ -156,7 +157,6 @@ export class HotelController {
     return this.hotelService.findHotel(hotel_id);
   }
 
-
   // ---------- SEARCH HOTEL BY NAME ----------
   @Get('search/name')
   @ApiOperation({
@@ -183,7 +183,7 @@ export class HotelController {
   }
 
   // ---------- SEARCH HOTEL BY NAME ----------
-  @Get('search/')
+  @Get('search')
   @ApiOperation({
     summary: 'Search Hotel By Name',
     description: 'UserRole.customer, UserRole.admin, UserRole.super_admin',
@@ -193,14 +193,28 @@ export class HotelController {
     return this.hotelService.getHotelByName(hotel_name);
   }
 
+  // // ---------SEARCH HOTEL BY ADDRESS-------------
+  // @Get('search/address')
+  // @ApiOperation({
+  //   summary: 'Search Hotel By address',
+  //   description: 'UserRole.customer, UserRole.admin, UserRole.super_admin',
+  // })
+  // getHotelByLocation(@Query('address') address: string) {
+  //   return this.hotelService.getHotelByLocation(address);
+  // }
+
   // ---------SEARCH HOTEL BY ADDRESS-------------
   @Get('search/address')
   @ApiOperation({
     summary: 'Search Hotel By address',
     description: 'UserRole.customer, UserRole.admin, UserRole.super_admin',
   })
-  getHotelByLocation(@Query('address') address: string) {
-    return this.hotelService.getHotelByLocation(address);
+  getHotelByLocation(
+    @Query('address') address: string,
+    @Query('minPrice') minPrice?: number,
+    @Query('maxPrice') maxPrice?: number,
+  ) {
+    return this.hotelService.getHotelByLocation(address, minPrice, maxPrice);
   }
 
   // -----------GET HOTEL BY HOTEL ADMIN------------

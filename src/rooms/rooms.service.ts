@@ -159,7 +159,6 @@ export class RoomsService {
   }
 
   // --------ROOM NUMBER VALIDATION-------------
-
   async validateRoomNumberUniqueness(roomNumber: number, hotelId: string) {
     if (isNaN(roomNumber)) {
       throw new BadRequestException('Room number must be a valid number.');
@@ -264,8 +263,6 @@ export class RoomsService {
         'Room with this varient is not availiable to book!',
       );
     }
-    console.log(filteredRoom, 'filters');
-
     return filteredRoom;
   }
 
@@ -321,6 +318,7 @@ export class RoomsService {
       })
       .getMany();
   }
+  
   // --------------FIND ALL Rooms---------------
   async findAllRooms(user: User, hotel_id: string) {
     try {

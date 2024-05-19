@@ -182,18 +182,54 @@ export class HotelService {
   }
 
   //----------GET HOTEL BY LOCATION--------------
-  async getHotelByLocation(address: string) {
+  async getHotelByLocation(
+    address: string,
+    minPrice?: number,
+    maxPrice?: number,
+  ) {
     try {
-      const hotels = await this.dataSource
+      // const hotels = await this.dataSource
+      //   .getRepository(Hotel)
+      //   .createQueryBuilder('hotel')
+      //   .leftJoinAndSelect('hotel.rooms', 'rooms')
+      //   .where('hotel.address ILike :address', { address: `%${address}%` })
+      //   .andWhere('rooms.room_rate BETWEEN :minPrice AND :maxPrice', {
+      //     minPrice,
+      //     maxPrice,
+      //   })
+      //   .getMany();
+      // if (!hotels || hotels.length === 0) {
+      //   this.logger.warn(`No hotels found for address: ${address}`);
+      //   return [];
+      // }
+      // // Extract details of only one room per hotel
+      // const hotelsWithOneRoom = hotels.map((hotel) => ({
+      //   ...hotel,
+      //   rooms: hotel.rooms.length > 0 ? [hotel.rooms[0]] : [], // Get details of only one room per hotel
+      // }));
+
+      // return hotelsWithOneRoom;
+
+      let query = this.dataSource
         .getRepository(Hotel)
         .createQueryBuilder('hotel')
         .leftJoinAndSelect('hotel.rooms', 'rooms')
-        .where('hotel.address ILike :address', { address: `%${address}%` })
-        .getMany();
+        .where('hotel.address ILike :address', { address: `%${address}%` });
+
+      if (minPrice !== undefined && maxPrice !== undefined) {
+        query = query.andWhere(
+          'rooms.room_rate BETWEEN :minPrice AND :maxPrice',
+          { minPrice, maxPrice },
+        );
+      }
+
+      const hotels = await query.getMany();
+
       if (!hotels || hotels.length === 0) {
         this.logger.warn(`No hotels found for address: ${address}`);
         return [];
       }
+
       // Extract details of only one room per hotel
       const hotelsWithOneRoom = hotels.map((hotel) => ({
         ...hotel,
@@ -221,7 +257,7 @@ export class HotelService {
   async filteredHotels(address: string, check_in: string, check_out: string) {
     const filterHotel = await this.dataSource
       .getRepository(Hotel)
-      .findOne({ where: { address: address  } });
+      .findOne({ where: { address: address } });
     return filterHotel;
   }
 

@@ -34,6 +34,7 @@ export class CronService {
       console.log(checkoutDate, 'From cron');
       const cDate = currentDate.getTime();
       const rDate = checkoutDate.getTime();
+
       if (cDate > rDate) {
         await this.dataSource.transaction(async (entityManager) => {
           if (rooms) {
@@ -44,11 +45,5 @@ export class CronService {
         });
       }
     }
-  }
-
-  // Cron job for not responding reminders
-  @Cron(CronExpression.EVERY_10_SECONDS)
-  async handleCron2() {
-    // Getting unresponed reminder
   }
 }
