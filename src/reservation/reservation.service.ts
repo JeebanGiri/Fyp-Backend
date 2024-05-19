@@ -55,6 +55,7 @@ export class ReservationService {
         throw new UnauthorizedException(
           'Please login first to find best accommodation?',
         );
+
       if (!payload.full_name)
         throw new BadRequestException('Please provide your full name');
       if (!payload.country)

@@ -216,6 +216,29 @@ export class RoomsService {
     }
   }
 
+  // ---------GET HOTEL ROOM By Id-----------
+  async getRoomsByRoomId(room_id: string) {
+    // const rooms = await this.dataSource.getRepository(Rooms).findAndCount({
+    //   where: { id: room_id },
+    //   select: [
+    //     'room_name',
+    //     'room_type',
+    //     'room_capacity',
+    //     'room_rate',
+    //     'hotel_id',
+    //     'images',
+    //   ],
+    // });
+    const rooms = await this.dataSource
+      .getRepository(Rooms)
+      .findOne({ where: { id: room_id } });
+
+    if (!rooms)
+      throw new BadRequestException('Rooms are Not Found in this hotel');
+
+    return rooms;
+  }
+
   // ---------------GET TOTAL ROOMS BY ROOMTYPE------------
   async getTotalRoomsByType(roomType: RoomType) {
     const totalRooms = await this.dataSource
@@ -318,7 +341,7 @@ export class RoomsService {
       })
       .getMany();
   }
-  
+
   // --------------FIND ALL Rooms---------------
   async findAllRooms(user: User, hotel_id: string) {
     try {

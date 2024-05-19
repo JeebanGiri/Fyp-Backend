@@ -65,7 +65,6 @@ export class RoomsController {
     @Param('hotel_id') hotel_id: string,
     @UploadedFiles() files: Express.Multer.File[],
   ) {
-    console.log(payload, 'Payload data or rooms');
     return this.roomService.addRooms(user_id, payload, hotel_id, files);
   }
 
@@ -87,7 +86,7 @@ export class RoomsController {
   @ApiConsumes('miltipart/form-data')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth('JWT_auth')
-  @Roles(UserRole.super_admin)
+  @Roles(UserRole.super_admin, UserRole.hotel_admin)
   updateRooms(
     @GetUser() user: User,
     @Param('room_id') room_id: string,
@@ -117,6 +116,17 @@ export class RoomsController {
     });
   }
 
+  // ---------GET ROOMS BY Room ID -----------
+  @Get('/find-room/:room_id')
+  @ApiOperation({
+    summary: 'Get All Hotel Rooms',
+    description: `${UserRole.hotel_admin && UserRole.super_admin}`,
+  })
+  @Roles(UserRole.hotel_admin && UserRole.super_admin)
+  getRoomsByRoomId(@Param('room_id') room_id: string) {
+    return this.roomService.getRoomsByRoomId(room_id);
+  }
+
   // ----------FIND ALL ROOMS---------------
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth('JWT-auth')
@@ -127,10 +137,6 @@ export class RoomsController {
     description: 'UserRole.admin',
   })
   getHotelRooms(@GetUser() user: User, @Param('hotel_id') hotel_id: string) {
-    console.log(user, 'users is getting   ');
-    console.log(hotel_id, 'hotel is getting   ');
-    console.log(user, hotel_id, 'user and hotel');
-
     return this.roomService.findAllRooms(user, hotel_id);
   }
 
@@ -167,7 +173,6 @@ export class RoomsController {
   ) {
     return this.roomService.getRoomByTypes(room_type, hotel_id);
   }
-
 
   // ------------DISPLAY HOTEL ROOMS IN LANDING--------------
   @Get('/getrooms/:hotel_id')
