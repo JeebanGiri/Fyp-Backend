@@ -2,7 +2,6 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsArray,
   IsEnum,
-  IsIn,
   IsInt,
   IsNotEmpty,
   IsNumber,
@@ -51,7 +50,7 @@ export class UpdateRoomDto {
   @ApiPropertyOptional({ example: 'Executive Suite' })
   @IsOptional()
   @IsString()
-  name?: string;
+  room_name?: string;
 
   @ApiPropertyOptional({ example: '100' })
   @IsOptional()
@@ -60,13 +59,18 @@ export class UpdateRoomDto {
 
   @ApiPropertyOptional({
     type: 'enum',
-    enum: [RoomType.DELUXE, RoomType.DELUXE_DOUBLE_ROOM],
+    enum: [
+      RoomType.DELUXE,
+      RoomType.DELUXE_DOUBLE_ROOM,
+      RoomType.DOUBLE,
+      RoomType.TRIPLE_ROOM,
+      RoomType.STANDARD,
+    ],
     example: RoomType.DELUXE,
   })
   @IsEnum([RoomType.DELUXE, RoomType.TRIPLE_ROOM])
-  @IsIn([RoomType.STANDARD, RoomType.DELUXE])
-  @IsNotEmpty()
-  room_type: RoomType;
+  @IsOptional()
+  room_type?: RoomType;
 
   @ApiPropertyOptional({ example: '1000' })
   @IsOptional()
@@ -76,15 +80,11 @@ export class UpdateRoomDto {
   @ApiPropertyOptional({ example: '4' })
   @IsOptional()
   @IsNumber()
-  room_capicity?: number;
+  room_capacity?: number;
 
   @ApiPropertyOptional({ type: 'array', format: 'binary', isArray: true })
   @IsOptional()
   @IsArray()
   @IsNotEmpty()
   images?: any[];
-
-  @ApiProperty({ example: '8943f3-nfj34f-njwhi3-nfhj42-fejhf3' })
-  @IsString()
-  hotel_id: string;
 }

@@ -29,6 +29,7 @@ import {
   PaymentStatus,
   PaymentType,
 } from 'src/payment/entities/payment.entity';
+import { Report, ReportStatus } from 'src/reports/entities/reports.entity';
 
 @Injectable()
 export class ReservationService {
@@ -92,7 +93,6 @@ export class ReservationService {
           check_In_Date: checkInDate,
           check_Out_Date: checkOutDate,
           user_id: loggedUser.id,
-
           room_type: room_type,
           room_quantity: room_quantity,
           hotel_id: hotel.id,
@@ -132,7 +132,13 @@ export class ReservationService {
       });
 
       reservation.status = ReservationStatus.APPROVED;
+      const reports = new Report();
+      reports.hotel_name = hotel.name;
+      reports.hotel_address = hotel.address;
+      reports.status = ReportStatus.RESOLVED;
+
       await queryRunner.manager.getRepository(Reservation).save(reservation);
+      await queryRunner.manager.getRepository(Report).save(reports);
 
       // -----------SEND MAIL AFTER PAYMENT SUCCESSFULL----------------
       sendMail({

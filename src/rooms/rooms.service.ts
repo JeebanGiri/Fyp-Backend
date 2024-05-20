@@ -229,6 +229,7 @@ export class RoomsService {
     //     'images',
     //   ],
     // });
+
     const rooms = await this.dataSource
       .getRepository(Rooms)
       .findOne({ where: { id: room_id } });

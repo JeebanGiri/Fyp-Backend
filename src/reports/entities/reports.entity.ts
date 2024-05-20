@@ -31,10 +31,16 @@ export class Report {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   title: string;
 
-  @Column({ type: 'varchar', length: 500 })
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  hotel_name: string;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  hotel_address: string;
+
+  @Column({ type: 'varchar', length: 500, nullable: true })
   description: string;
 
   @Column({ type: 'enum', enum: ReportStatus, default: ReportStatus.PENDING })
@@ -53,7 +59,6 @@ export class Report {
   updated_at: Date;
 
   // ----------RELATIONS----------
-
   @Column()
   user_id: string;
 
