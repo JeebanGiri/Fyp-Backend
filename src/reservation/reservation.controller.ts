@@ -102,7 +102,7 @@ export class ReservationController {
   }
 
   // --------GET ALL RESERVATION (Hotel Admin)-------------
-  @Get('all')
+  @Get('get-all-reservation')
   @ApiOperation({
     summary: 'Get All Reservation',
     description: `${UserRole.hotel_admin}`,
@@ -204,6 +204,26 @@ export class ReservationController {
       user_id,
       reservation_id,
       input,
+    );
+  }
+
+  // --------Generate Report (Hotel Admin)-------------
+  @Get('generate-report/:bookId/:user_id/:check_In_Date')
+  @ApiOperation({
+    summary: 'Generate',
+    description: `${UserRole.hotel_admin}`,
+  })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.hotel_admin)
+  generateReport(
+    @Param('bookId') bookId: string,
+    @Param('user_id') user_id: string,
+    @Param('check_In_Date') check_In_Date: string,
+  ) {
+    return this.reservationService.generateCustomerReport(
+      bookId,
+      user_id,
+      check_In_Date,
     );
   }
 }

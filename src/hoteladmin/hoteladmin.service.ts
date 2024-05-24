@@ -20,7 +20,7 @@ import slugify from 'slugify';
 import { CreateHotelDto, UpdateHotelDto } from 'src/hotel/dto/hotel.dto';
 import { HotelAdminDocumentDetails } from './entities/hoteladmin-document-details';
 import { HotelAdminPaymentDetails } from './entities/hoteladmin-payment-details';
-import { Rooms } from 'src/rooms/entities/rooms.entity';
+import { RoomAvailiability, Rooms } from 'src/rooms/entities/rooms.entity';
 import { Reservation } from 'src/reservation/entities/reservation.entity';
 
 @Injectable()
@@ -327,15 +327,21 @@ export class HotelAdminService {
   }
 
   // -----------GET TOTAL REGISTERED ROOMS---------------
-  async getTotalRooms(user_id: string) {
-    if (!user_id) throw new BadRequestException('Hotel Not Found!');
+  async getTotalRooms(user: User) {
+    console.log(user.id);
+    if (!user) throw new BadRequestException('Hotel Not Found!');
+
     const hotel = await this.dataSource
       .getRepository(Hotel)
-      .findOne({ where: { user_id: user_id } });
+      .findOne({ where: { user_id: user.id } });
+
     if (hotel) {
-      const rooms = await this.dataSource
-        .getRepository(Rooms)
-        .findOne({ where: { hotel_id: hotel.id } });
+      const rooms = await this.dataSource.getRepository(Rooms).findOne({
+        where: {
+          hotel_id: hotel.id,
+          room_status: RoomAvailiability.AVAILABLE,
+        },
+      });
       if (!rooms) throw new BadRequestException('Rooms not Found.');
       return await this.dataSource.getRepository(Rooms).count();
     }

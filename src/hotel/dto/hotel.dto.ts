@@ -22,7 +22,7 @@ export interface ITimeRange {
 export class CreateHotelDto {
   @ApiProperty({ example: 'Hotel Residence' })
   @IsString()
-  @MinLength(3)
+  @MinLength(5)
   hotel_name: string;
 
   @ApiProperty({ example: 'Biratchowk, Morang' })
@@ -49,9 +49,9 @@ export class CreateHotelDto {
   @IsOptional()
   checkin_checkout: ITimeRange;
 
+  @ApiPropertyOptional({ type: 'array', format: 'binary', isArray: true })
   @IsNotEmpty()
   @IsArray()
-  @ApiPropertyOptional({ type: 'array', format: 'binary', isArray: true })
   @IsOptional()
   documents?: any[];
 
@@ -110,6 +110,7 @@ export class UpdateHotelDto {
   @ApiProperty({ example: 'HotelX' })
   @IsString()
   @IsOptional()
+  @MinLength(5)
   hotel_name?: string;
 
   @ApiProperty({ example: 'Biratchowk, Morang' })
@@ -128,33 +129,21 @@ export class UpdateHotelDto {
   avatar?: any;
 
   @ApiPropertyOptional({ example: 'example.jpg', format: 'binary' })
-  @IsNotEmpty()
   @IsOptional()
   cover?: any;
 
-  @ApiProperty({ example: '27.639302' })
-  @IsLatitude()
-  @IsOptional()
-  latitude?: number;
-
-  @ApiProperty({ example: '85.345988' })
-  @IsLongitude()
-  @IsOptional()
-  longitude?: number;
-
   @ApiPropertyOptional({
     example: {
-      open_time: '10:40 AM',
-      close_time: '5:50 PM',
+      check_in_time: '10:40 AM',
+      check_out_time: '5:50 PM',
     },
   })
   checkin_checkout?: ITimeRange;
 
-  @IsNotEmpty()
-  @IsArray()
   @ApiPropertyOptional({ type: 'array', format: 'binary', isArray: true })
+  @IsArray()
   @IsOptional()
-  documents?: string[];
+  documents?: any[];
 
   @ApiPropertyOptional()
   @IsString()
@@ -162,9 +151,8 @@ export class UpdateHotelDto {
   citizenship_no: string;
 
   @ApiPropertyOptional({ example: 'MM/DD/YYY' })
-  // @IsCustomDateFormat()
   @IsOptional()
-  @IsDate()
+  @IsDateString()
   citizenship_issued_date: string;
 
   @ApiPropertyOptional({ example: 'example.jpg', format: 'binary' })
@@ -174,10 +162,6 @@ export class UpdateHotelDto {
   @ApiPropertyOptional({ example: 'example.jpg', format: 'binary' })
   @IsOptional()
   citizenship_back: any;
-
-  @ApiPropertyOptional({ example: 'example.jpg', format: 'binary' })
-  @IsOptional()
-  profile_photo: any;
 
   @ApiPropertyOptional({ example: 'IL170108000000012612345' })
   @MinLength(10)
@@ -199,6 +183,12 @@ export class UpdateHotelDto {
   @IsString()
   @IsOptional()
   branch_name: string;
+
+  @ApiPropertyOptional({
+    example: 'Horizen Residence is a good hotel places for visitors.',
+  })
+  @IsString()
+  description: string;
 }
 
 export class Rating {

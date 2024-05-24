@@ -146,16 +146,22 @@ export class RoomsService {
       .getRepository(Rooms)
       .save({ ...roomInfo, ...payload });
 
-    const title = 'Add Room';
+    const title = 'Update Room';
     const body = 'Room Updated Notification';
-    await this.dataSource
-      .getRepository(Notification)
-      .save({ title: title, body: body });
 
-    return this.firebaseService.sendPushNotifications([user.id], {
+    await this.dataSource.getRepository(Notification).save({
+      title: title,
+      body: body,
+      user_id: user.id,
+      notification_type: NotificationType.message,
+    });
+
+    await this.firebaseService.sendPushNotifications([user.id], {
       title,
       body,
     });
+
+    return { message: 'Room Updated Successfully' };
   }
 
   // --------ROOM NUMBER VALIDATION-------------
@@ -166,16 +172,9 @@ export class RoomsService {
     if (!hotelId)
       throw new BadRequestException('Hotel not found to add the rooms.');
 
-    const roomsinfo = await this.dataSource
-      .getRepository(Rooms)
-      .findOne({ where: { room_number: roomNumber } });
-
-    if (roomsinfo)
-      throw new BadRequestException('Room With this number already exits');
-
     const existingRoom = await this.dataSource
       .getRepository(Rooms)
-      .findOne({ where: { room_number: roomNumber } });
+      .findOne({ where: { room_number: roomNumber, hotel_id: hotelId } });
 
     if (existingRoom) {
       throw new BadRequestException('Room with this number already exists.');

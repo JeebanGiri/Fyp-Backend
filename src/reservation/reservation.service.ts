@@ -41,8 +41,8 @@ export class ReservationService {
     hotel_id: string,
     room_id: string,
     room_type: string,
-    total_amount: number,
     room_quantity: number,
+    total_amount: number,
     checkInDate: string,
     checkOutDate: string,
     payload: CreateReservationDto,
@@ -84,6 +84,7 @@ export class ReservationService {
       // Assign the user's email to the user_email property
 
       const user_email = email.toLowerCase();
+
       const reservation = await queryRunner.manager
         .getRepository(Reservation)
         .save({
@@ -99,9 +100,16 @@ export class ReservationService {
           room_id: rooms.id,
         });
 
+      // const reports = new Report();
+      // reports.hotel_name = hotel.name;
+      // reports.hotel_address = hotel.address;
+      // reports.status = ReportStatus.RESOLVED;
+      // reports.reservation_id = reservation.id;
+      // await queryRunner.manager.getRepository(Report).save(reports);
+
       // -----------SEND MAIL IF BOOKING SUCCESSFULL----------------
       sendMail({
-        to: reservation.email,
+        to: payload.email,
         subject: 'Booking Sucessfull',
         html: defaultMailTemplate({
           title: 'Booking message',
@@ -112,33 +120,29 @@ export class ReservationService {
       });
 
       // Create Khalti payment
-      const formData = {
-        return_url: 'http://localhost:5173/my-reservation',
-        website_url: 'http://localhost:5173',
-        amount: 10000,
-        purchase_order_id: reservation.id,
-        purchase_order_name: 'Hotel Reservation',
-      };
+      // const formData = {
+      //   return_url: 'http://localhost:5173/my-reservation',
+      //   website_url: 'http://localhost:5173',
+      //   amount: 100,
+      //   purchase_order_id: reservation.id,
+      //   purchase_order_name: 'Hotel Reservation',
+      // };
 
-      const redirect = await this.callKhalti(formData);
-      await queryRunner.manager.getRepository(Payment).save({
-        amount: formData.amount,
-        khalti_token: '',
-        khalti_mobile: '',
-        payment_type: PaymentType.KHALTI,
-        payment_status: PaymentStatus.COMPLETED,
-        reservation_id: reservation.id,
-        total_amount: total_amount + formData.amount,
-      });
+      // const redirect = await this.callKhalti(formData);
+
+      // await queryRunner.manager.getRepository(Payment).save({
+      //   amount: formData.amount,
+      //   khalti_token: '',
+      //   khalti_mobile: '',
+      //   payment_type: PaymentType.KHALTI,
+      //   payment_status: PaymentStatus.COMPLETED,
+      //   reservation_id: reservation.id,
+      //   total_amount: total_amount + formData.amount,
+      // });
 
       reservation.status = ReservationStatus.APPROVED;
-      const reports = new Report();
-      reports.hotel_name = hotel.name;
-      reports.hotel_address = hotel.address;
-      reports.status = ReportStatus.RESOLVED;
-
-      await queryRunner.manager.getRepository(Reservation).save(reservation);
-      await queryRunner.manager.getRepository(Report).save(reports);
+      // Logging after reservation approval
+      console.log('Reservation approved:', reservation);
 
       // -----------SEND MAIL AFTER PAYMENT SUCCESSFULL----------------
       sendMail({
@@ -151,10 +155,12 @@ export class ReservationService {
         }),
       });
 
+      await queryRunner.manager.getRepository(Reservation).save(reservation);
+      await queryRunner.commitTransaction();
       return {
         message: 'Booked Sucessfully',
         reservation: reservation,
-        redirect,
+        // redirect,
       };
     } catch (error: any) {
       // Rollback the transaction in case of an error
@@ -494,5 +500,28 @@ export class ReservationService {
       message: 'Reservation Cancelled Sucessfully',
       cancelReservation: cancelledReservation,
     };
+  }
+
+  async generateCustomerReport(
+    book_id: string,
+    user_id: string,
+    check_In_Date: string,
+  ) {
+    try {
+      const reservation = await this.dataSource
+        .getRepository(Reservation)
+        .createQueryBuilder('reservation')
+        .leftJoinAndSelect('reservation.hotel', 'hotel')
+        .leftJoinAndSelect('reservation.user', 'user')
+        .where('reservation.id =:book_id', { book_id })
+        .andWhere('reservation.user_id =:user_id', { user_id })
+        .andWhere('reservation.check_In_Date =:check_In_Date', {
+          check_In_Date,
+        })
+        .getOne();
+      return reservation;
+    } catch (error) {
+      console.log(error);
+    }
   }
 }

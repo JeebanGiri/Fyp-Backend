@@ -30,10 +30,12 @@ import { HotelAdminModule } from './hoteladmin/hoteladmin.module';
 import { JwtService } from '@nestjs/jwt';
 import { FirebaseModule } from './firebase/firebase.module';
 import { CronModule } from './@cron/cron.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({ useFactory: () => TypeormConfig }),
+    ScheduleModule.forRoot(),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'static'),
       serveRoot: '/static',

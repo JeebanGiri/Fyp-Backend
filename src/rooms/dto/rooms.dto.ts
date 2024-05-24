@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsArray,
   IsEnum,
+  IsIn,
   IsInt,
   IsNotEmpty,
   IsNumber,
@@ -54,7 +55,8 @@ export class UpdateRoomDto {
 
   @ApiPropertyOptional({ example: '100' })
   @IsOptional()
-  @IsNumber()
+  @IsInt()
+  @Type(() => Number)
   room_number?: number;
 
   @ApiPropertyOptional({
@@ -68,18 +70,26 @@ export class UpdateRoomDto {
     ],
     example: RoomType.DELUXE,
   })
-  @IsEnum([RoomType.DELUXE, RoomType.TRIPLE_ROOM])
+  @IsIn([
+    RoomType.DELUXE,
+    RoomType.DELUXE_DOUBLE_ROOM,
+    RoomType.DOUBLE,
+    RoomType.STANDARD,
+    RoomType.TRIPLE_ROOM,
+  ])
   @IsOptional()
   room_type?: RoomType;
 
   @ApiPropertyOptional({ example: '1000' })
   @IsOptional()
-  @IsNumber()
+  @IsInt()
+  @Type(() => Number)
   room_rate?: number;
 
   @ApiPropertyOptional({ example: '4' })
   @IsOptional()
-  @IsNumber()
+  @IsInt()
+  @Type(() => Number)
   room_capacity?: number;
 
   @ApiPropertyOptional({ type: 'array', format: 'binary', isArray: true })

@@ -1,5 +1,5 @@
 import { Hotel } from 'src/hotel/entities/hotel.entity';
-import { Report } from 'src/reports/entities/reports.entity';
+// import { Report } from 'src/reports/entities/reports.entity';
 import { RoomType, Rooms } from 'src/rooms/entities/rooms.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Notification } from 'src/notification/entities/notification.entity';
@@ -99,8 +99,8 @@ export class Reservation {
   @JoinColumn({ name: 'room_id' })
   rooms: Rooms;
 
-  @OneToMany(() => Report, (report) => report.reservation, { cascade: true })
-  report: Report[];
+  // @OneToMany(() => Report, (report) => report.reservation, { cascade: true })
+  // report: Report[];
 
   @OneToMany(() => Notification, (notifications) => notifications.reservation, {
     cascade: true,

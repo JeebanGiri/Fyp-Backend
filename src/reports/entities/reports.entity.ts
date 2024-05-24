@@ -1,4 +1,4 @@
-import { Reservation } from 'src/reservation/entities/reservation.entity';
+// import { Reservation } from 'src/reservation/entities/reservation.entity';
 import { User } from 'src/users/entities/user.entity';
 import {
   Column,
@@ -66,12 +66,12 @@ export class Report {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @Column()
-  reservation_id: string;
+  // @Column()
+  // reservation_id: string;
 
-  @ManyToOne(() => Reservation, (reservation) => reservation.report, {
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn({ name: 'reservation_id' })
-  reservation: Reservation;
+  // @ManyToOne(() => Reservation, (reservation) => reservation.report, {
+  //   onDelete: 'CASCADE',
+  // })
+  // @JoinColumn({ name: 'reservation_id' })
+  // reservation: Reservation;
 }

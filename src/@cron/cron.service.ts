@@ -10,31 +10,27 @@ export class CronService {
 
   @Cron(CronExpression.EVERY_10_SECONDS)
   async handleCron() {
+    const currentDate = new Date();
+    console.log(`Cron job triggered at ${currentDate.toISOString()}`);
     const reservations = await this.dataSource
       .getRepository(Reservation)
       .find();
-
-    const currentDate = new Date();
-
+    console.log(`Found ${reservations.length} reservations`);
     for (const reservation of reservations) {
       const findReservation = await this.dataSource
         .getRepository(Reservation)
         .findOne({ where: { id: reservation.id } });
-
       const foundReservation = await this.dataSource
         .getRepository(Reservation)
         .createQueryBuilder('reservation')
         .leftJoinAndSelect('reservation.rooms', 'rooms')
-        .where('reservation.id = : bookId', { bookId: findReservation.id })
+        .where('reservation.id = :id', { id: findReservation.id })
         .getOne();
-
       const rooms = foundReservation.rooms;
-
       const checkoutDate = new Date(reservation.check_Out_Date);
       console.log(checkoutDate, 'From cron');
       const cDate = currentDate.getTime();
       const rDate = checkoutDate.getTime();
-
       if (cDate > rDate) {
         await this.dataSource.transaction(async (entityManager) => {
           if (rooms) {
@@ -44,6 +40,7 @@ export class CronService {
           }
         });
       }
+      await this.dataSource.getRepository(Reservation).save(reservation);
     }
   }
 }

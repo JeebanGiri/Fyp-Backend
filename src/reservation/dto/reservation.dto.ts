@@ -120,3 +120,4 @@ export class CancelReservationDto {
   @IsOptional()
   reason: string;
 }
+

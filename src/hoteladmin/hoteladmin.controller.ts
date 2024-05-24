@@ -104,8 +104,9 @@ export class HotelAdminController {
   })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.hotel_admin)
-  getAllRooms(@GetUser('user_id') user_id: string) {
-    return this.hotelAdminService.getTotalRooms(user_id);
+  getAllRooms(@GetUser() user: User) {
+    console.log(user.id);
+    return this.hotelAdminService.getTotalRooms(user);
   }
 
   // -----GET TOTAL ROOMS----------------
@@ -158,9 +159,9 @@ export class HotelAdminController {
 
   //-------------UPDATE HOTEL ADMIN DETAILS--------------
 
-  @Patch('edit-hotel/:hotel_id')
+  @Patch('update-hotel/:hotel_id')
   @ApiOperation({
-    summary: 'Register a Hotel',
+    summary: 'Update a Hotel',
     description: `${UserRole.hotel_admin}`,
   })
   @UseInterceptors(
@@ -169,13 +170,12 @@ export class HotelAdminController {
         { name: 'avatar', maxCount: 1 },
         { name: 'cover', maxCount: 1 },
         { name: 'documents', maxCount: 3 },
-        { name: 'profile_photo', maxCount: 1 },
         { name: 'citizenship_front', maxCount: 1 },
         { name: 'citizenship_back', maxCount: 1 },
       ],
       {
         storage: diskStorage({
-          destination: 'static/hotel_admin/register-hotel',
+          destination: 'static/hotel_admin/update-hotel',
           filename,
         }),
         fileFilter: imageFileFilter,
@@ -189,7 +189,7 @@ export class HotelAdminController {
   @Roles(UserRole.hotel_admin)
   editHotelDetails(
     @GetUser('id') user_id: string,
-    @Param('hotel_id', new ParseUUIDPipe()) hotel_id: string,
+    @Param('hotel_id') hotel_id: string,
     @Body() payload: UpdateHotelDto,
     @UploadedFiles() files: Express.Multer.File[],
   ) {
