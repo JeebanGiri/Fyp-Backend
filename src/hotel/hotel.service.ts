@@ -141,12 +141,12 @@ export class HotelService {
     if (payload.hotel_name) {
       payload['slug'] = slugify(payload.hotel_name, { lower: true });
     }
-    if (payload.latitude && payload.longitude) {
-      payload['location'] = {
-        type: 'Point',
-        coordinates: [payload.latitude, payload.longitude],
-      };
-    }
+    // if (payload.latitude && payload.longitude) {
+    //   payload['location'] = {
+    //     type: 'Point',
+    //     coordinates: [payload.latitude, payload.longitude],
+    //   };
+    // }
 
     if (payload.checkin_checkout) {
       payload['checkin_checkout'] = {

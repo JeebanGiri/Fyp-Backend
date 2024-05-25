@@ -3,7 +3,6 @@ import {
   Controller,
   Get,
   Param,
-  ParseUUIDPipe,
   Patch,
   Post,
   UploadedFiles,
@@ -188,13 +187,14 @@ export class HotelAdminController {
   @ApiBearerAuth('JWT-auth')
   @Roles(UserRole.hotel_admin)
   editHotelDetails(
-    @GetUser('id') user_id: string,
+    @GetUser() user: User,
     @Param('hotel_id') hotel_id: string,
     @Body() payload: UpdateHotelDto,
     @UploadedFiles() files: Express.Multer.File[],
   ) {
+    console.log(user, 'for update');
     return this.hotelAdminService.editHotelDetails(
-      user_id,
+      user,
       hotel_id,
       payload,
       files,

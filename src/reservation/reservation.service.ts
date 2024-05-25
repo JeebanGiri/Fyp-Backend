@@ -100,13 +100,6 @@ export class ReservationService {
           room_id: rooms.id,
         });
 
-      // const reports = new Report();
-      // reports.hotel_name = hotel.name;
-      // reports.hotel_address = hotel.address;
-      // reports.status = ReportStatus.RESOLVED;
-      // reports.reservation_id = reservation.id;
-      // await queryRunner.manager.getRepository(Report).save(reports);
-
       // -----------SEND MAIL IF BOOKING SUCCESSFULL----------------
       sendMail({
         to: payload.email,
@@ -120,25 +113,25 @@ export class ReservationService {
       });
 
       // Create Khalti payment
-      // const formData = {
-      //   return_url: 'http://localhost:5173/my-reservation',
-      //   website_url: 'http://localhost:5173',
-      //   amount: 100,
-      //   purchase_order_id: reservation.id,
-      //   purchase_order_name: 'Hotel Reservation',
-      // };
+      const formData = {
+        return_url: 'http://localhost:5173/my-reservation',
+        website_url: 'http://localhost:5173',
+        amount: 100,
+        purchase_order_id: reservation.id,
+        purchase_order_name: 'Hotel Reservation',
+      };
 
-      // const redirect = await this.callKhalti(formData);
+      const redirect = await this.callKhalti(formData);
 
-      // await queryRunner.manager.getRepository(Payment).save({
-      //   amount: formData.amount,
-      //   khalti_token: '',
-      //   khalti_mobile: '',
-      //   payment_type: PaymentType.KHALTI,
-      //   payment_status: PaymentStatus.COMPLETED,
-      //   reservation_id: reservation.id,
-      //   total_amount: total_amount + formData.amount,
-      // });
+      await queryRunner.manager.getRepository(Payment).save({
+        amount: formData.amount,
+        khalti_token: '',
+        khalti_mobile: '',
+        payment_type: PaymentType.KHALTI,
+        payment_status: PaymentStatus.COMPLETED,
+        reservation_id: reservation.id,
+        total_amount: total_amount + formData.amount,
+      });
 
       reservation.status = ReservationStatus.APPROVED;
       // Logging after reservation approval

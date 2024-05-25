@@ -1,7 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsArray,
-  IsDate,
   IsDateString,
   IsInt,
   IsLatitude,
@@ -152,8 +151,8 @@ export class UpdateHotelDto {
 
   @ApiPropertyOptional({ example: 'MM/DD/YYY' })
   @IsOptional()
-  @IsDateString()
-  citizenship_issued_date: string;
+  // @IsDateString()
+  citizenship_issued_date?: string;
 
   @ApiPropertyOptional({ example: 'example.jpg', format: 'binary' })
   @IsOptional()
@@ -164,8 +163,6 @@ export class UpdateHotelDto {
   citizenship_back: any;
 
   @ApiPropertyOptional({ example: 'IL170108000000012612345' })
-  @MinLength(10)
-  @MaxLength(25)
   @IsOptional()
   account_number: string;
 

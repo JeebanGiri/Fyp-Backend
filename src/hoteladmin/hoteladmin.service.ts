@@ -7,7 +7,7 @@ import {
   LoginHotelAdminDto,
   RegisterHotelAdminDto,
 } from './dto/hoteladmin.dto';
-import { DataSource, Point } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { User, UserRole } from 'src/users/entities/user.entity';
 import * as argon from 'argon2';
 import { OtpService } from 'src/otp/otp.service';
@@ -15,8 +15,7 @@ import { OTPType } from 'src/otp/entities/otp.entity';
 import { sendMail } from 'src/@helpers/mail';
 import { defaultMailTemplate } from 'src/@helpers/mail-templates/default.mail-template';
 import { JwtService } from '@nestjs/jwt';
-import { Hotel, HotelApproveStatus } from 'src/hotel/entities/hotel.entity';
-import slugify from 'slugify';
+import { Hotel } from 'src/hotel/entities/hotel.entity';
 import { CreateHotelDto, UpdateHotelDto } from 'src/hotel/dto/hotel.dto';
 import { HotelAdminDocumentDetails } from './entities/hoteladmin-document-details';
 import { HotelAdminPaymentDetails } from './entities/hoteladmin-payment-details';
@@ -251,13 +250,18 @@ export class HotelAdminService {
 
   // ------------GET HOTEL ADMIN DETAILS--------------
   async getMyHotelDetails(user: User) {
-    return this.dataSource
+    const result = await this.dataSource
       .getRepository(Hotel)
-      .find({ where: { user_id: user.id } });
+      .createQueryBuilder('hotel')
+      .leftJoinAndSelect('hotel.payment_detail', 'paymentDetails')
+      .leftJoinAndSelect('hotel.document_detail', 'documentDetails')
+      .where('hotel.user_id = :userId', { userId: user.id })
+      .getOne();
+    return result;
   }
 
   async editHotelDetails(
-    user_id: string,
+    user: User,
     hotel_id: string,
     payload: UpdateHotelDto,
     files: Express.Multer.File[],
@@ -266,7 +270,7 @@ export class HotelAdminService {
     const hotel = await this.dataSource.manager.getRepository(Hotel).findOne({
       where: {
         id: hotel_id,
-        user_id: user_id,
+        user_id: user.id,
       },
       select: {
         id: true,
@@ -276,9 +280,6 @@ export class HotelAdminService {
 
     // Manage uploaded files
     if (files) {
-      if (files['profile_photo']) {
-        payload.profile_photo = '/' + files['profile_photo'][0].path;
-      }
       if (files['avatar']) {
         payload.avatar = '/' + files['avatar'][0].path;
       }
@@ -307,11 +308,11 @@ export class HotelAdminService {
 
     const hotelAdminDocumentDetails = await this.dataSource.manager
       .getRepository(HotelAdminDocumentDetails)
-      .findOne({ where: { user_id: user_id } });
+      .findOne({ where: { user_id: user.id } });
 
     const hotelAdminPaymentDetails = await this.dataSource.manager
       .getRepository(HotelAdminPaymentDetails)
-      .findOne({ where: { user_id: user_id } });
+      .findOne({ where: { user_id: user.id } });
 
     Object.assign(hotelAdminDocumentDetails, payload);
     Object.assign(hotelAdminPaymentDetails, payload);

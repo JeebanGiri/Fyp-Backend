@@ -37,7 +37,7 @@ export class HotelAdminPaymentDetails {
   @Column({ nullable: true })
   hotel_id: string;
 
-  @OneToOne(() => Hotel, (hotel) => hotel.hoteladminpaymentdetails, {
+  @OneToOne(() => Hotel, (hotel) => hotel.payment_detail, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'hotel_id' })

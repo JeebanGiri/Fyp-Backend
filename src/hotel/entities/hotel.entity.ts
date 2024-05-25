@@ -118,18 +118,18 @@ export class Hotel {
 
   @OneToOne(
     () => HotelAdminPaymentDetails,
-    (hoteladminpaymentdetails) => hoteladminpaymentdetails.hotel,
+    (paymentDetails) => paymentDetails.hotel,
     { cascade: true },
   )
   @JoinColumn({ name: 'payment_id' })
-  hoteladminpaymentdetails: HotelAdminPaymentDetails;
+  payment_detail: HotelAdminPaymentDetails;
 
   @Column({ nullable: true })
   document_Details_id: string;
 
   @OneToOne(
     () => HotelAdminDocumentDetails,
-    (hote_admin_document_details) => hote_admin_document_details.hotel,
+    (documentDetails) => documentDetails.hotel,
     { cascade: true },
   )
   document_detail: HotelAdminDocumentDetails;
