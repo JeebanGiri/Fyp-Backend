@@ -99,9 +99,6 @@ export class Reservation {
   @JoinColumn({ name: 'room_id' })
   rooms: Rooms;
 
-  // @OneToMany(() => Report, (report) => report.reservation, { cascade: true })
-  // report: Report[];
-
   @OneToMany(() => Notification, (notifications) => notifications.reservation, {
     cascade: true,
   })

@@ -193,16 +193,6 @@ export class HotelController {
     return this.hotelService.getHotelByName(hotel_name);
   }
 
-  // // ---------SEARCH HOTEL BY ADDRESS-------------
-  // @Get('search/address')
-  // @ApiOperation({
-  //   summary: 'Search Hotel By address',
-  //   description: 'UserRole.customer, UserRole.admin, UserRole.super_admin',
-  // })
-  // getHotelByLocation(@Query('address') address: string) {
-  //   return this.hotelService.getHotelByLocation(address);
-  // }
-
   // ---------SEARCH HOTEL BY ADDRESS-------------
   @Get('search/address')
   @ApiOperation({
@@ -245,4 +235,5 @@ export class HotelController {
   ) {
     return this.hotelService.deletehotelById(user_id, hotel_id);
   }
+
 }

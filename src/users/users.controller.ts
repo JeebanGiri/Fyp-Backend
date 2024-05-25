@@ -19,6 +19,7 @@ import { diskStorage } from 'multer';
 import {
   ChangePasswordDto,
   GetUsersQuery,
+  UpdateProfilePhotoDto,
   UpdateUserDto,
 } from './dto/user.dto';
 import { filename, imageFileFilter } from 'src/@helpers/storage';
@@ -76,6 +77,32 @@ export class UsersController {
     return this.userService.updateCurrentUser(user, payload, file);
   }
 
+  // -----------CHANGE PROFILE-----------
+  @UseGuards(JwtAuthGuard)
+  @Patch('update-profile')
+  @ApiOperation({
+    summary: 'Update user profile',
+    description: 'UserRole.All',
+  })
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      storage: diskStorage({
+        destination: 'static/user/avatars',
+        filename,
+      }),
+      fileFilter: imageFileFilter,
+    }),
+  )
+  updateProfile(
+    @GetUser() user: User,
+    payload: UpdateProfilePhotoDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    return this.userService.updateUserProfile(user, payload, file);
+  }
+
+  //------- CHANGE PASSWORD-------------
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.customer, UserRole.super_admin, UserRole.hotel_admin)
   @Patch('change-password')

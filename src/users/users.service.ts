@@ -4,19 +4,16 @@ import { User, UserRole } from './entities/user.entity';
 import {
   ChangePasswordDto,
   GetUsersQuery,
+  UpdateProfilePhotoDto,
   UpdateUserDto,
 } from './dto/user.dto';
 import { paginateResponse } from 'src/@helpers/pagination';
-import { OtpService } from 'src/otp/otp.service';
 import * as argon from 'argon2';
 import * as fs from 'fs';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    private readonly dataSource: DataSource,
-    private readonly otpService: OtpService,
-  ) {}
+  constructor(private readonly dataSource: DataSource) {}
 
   // ---------- GET ALL USERS (ADMIN) ----------
   async getAllUsers(role: UserRole, query: GetUsersQuery) {
@@ -135,6 +132,38 @@ export class UsersService {
 
     return {
       message: 'Profile updated successfully.',
+    };
+  }
+
+  async updateUserProfile(
+    user: User,
+    payload: UpdateProfilePhotoDto,
+    file?: Express.Multer.File,
+  ) {
+    // Check if a file is provided
+    if (!file) {
+      throw new BadRequestException(
+        'Please select file from device to update.',
+      );
+    }
+
+    // Find the existing user
+    const existingUser = await this.dataSource
+      .getRepository(User)
+      .findOne({ where: { id: user.id } });
+
+    // Check if payload is defined and has the 'avatar' property
+    // Set the avatar property of the existing user to the file path
+    existingUser.avatar = '/' + file.filename;
+
+    // Save the updated user
+    const updatedUser = await this.dataSource
+      .getRepository(User)
+      .save(existingUser);
+
+    return {
+      message: 'Profile updated successfully.',
+      updatedUser,
     };
   }
 

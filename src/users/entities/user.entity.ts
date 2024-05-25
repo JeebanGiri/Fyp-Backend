@@ -4,6 +4,7 @@ import { HotelAdminDocumentDetails } from 'src/hoteladmin/entities/hoteladmin-do
 import { HotelAdminPaymentDetails } from 'src/hoteladmin/entities/hoteladmin-payment-details';
 import { Notification } from 'src/notification/entities/notification.entity';
 import { OTP } from 'src/otp/entities/otp.entity';
+import { Rating } from 'src/rating/entities/rating.entity';
 import { Report } from 'src/reports/entities/reports.entity';
 import { Reservation } from 'src/reservation/entities/reservation.entity';
 import {
@@ -47,7 +48,7 @@ export class User {
   @Column({ type: 'varchar', length: 255, nullable: true })
   avatar: string;
 
-  @Column({ select: false })
+  @Column({ select: false, nullable: true })
   password: string;
 
   @Column({
@@ -129,4 +130,7 @@ export class User {
     { cascade: true },
   )
   firebase_notification_tokens: FirebaseToken[];
+
+  @OneToMany(() => Rating, (rating) => rating.user, { cascade: true })
+  rating: Rating[];
 }

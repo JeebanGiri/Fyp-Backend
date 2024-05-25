@@ -16,6 +16,7 @@ import { ITimeRange } from '../dto/hotel.dto';
 import { HotelAvailiability } from '../dto/hotel-availiability.dto';
 import { HotelAdminPaymentDetails } from 'src/hoteladmin/entities/hoteladmin-payment-details';
 import { HotelAdminDocumentDetails } from 'src/hoteladmin/entities/hoteladmin-document-details';
+import { Rating } from 'src/rating/entities/rating.entity';
 
 export enum HotelApproveStatus {
   PENDING = 'PENDING',
@@ -133,4 +134,7 @@ export class Hotel {
     { cascade: true },
   )
   document_detail: HotelAdminDocumentDetails;
+
+  @OneToMany(() => Rating, (rating) => rating.hotel, { cascade: true })
+  rating: Rating[];
 }

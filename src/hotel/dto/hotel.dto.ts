@@ -6,6 +6,7 @@ import {
   IsLatitude,
   IsLongitude,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsPhoneNumber,
   IsString,
@@ -186,13 +187,4 @@ export class UpdateHotelDto {
   })
   @IsString()
   description: string;
-}
-
-export class Rating {
-  @ApiPropertyOptional({ example: '3' })
-  @IsInt()
-  rating_value: number;
-
-  @IsString()
-  user_id: string;
 }

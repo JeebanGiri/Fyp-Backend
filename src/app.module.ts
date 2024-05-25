@@ -31,6 +31,7 @@ import { JwtService } from '@nestjs/jwt';
 import { FirebaseModule } from './firebase/firebase.module';
 import { CronModule } from './@cron/cron.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { RatingModule } from './rating/rating.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     HotelAdminModule,
     FirebaseModule,
     CronModule,
+    RatingModule,
   ],
   controllers: [
     AppController,

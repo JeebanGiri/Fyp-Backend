@@ -22,8 +22,8 @@ export class UpdateUserDto {
   @IsOptional()
   address?: string;
 
-  @MinLength(8)
   @ApiPropertyOptional({ minLength: 8, example: 'Secret@123' })
+  @MinLength(8)
   @IsOptional()
   old_password?: string;
 
@@ -82,6 +82,12 @@ export class PaginationQuery {
   @IsOptional()
   @Transform(({ value }) => parseInt(value))
   limit?: number;
+}
+
+export class UpdateProfilePhotoDto {
+  @ApiPropertyOptional({ format: 'binary', example: 'user.jpg' })
+  @IsOptional()
+  avatar: any;
 }
 
 export class GetUsersQuery extends PaginationQuery {

@@ -56,7 +56,6 @@ export class ReservationService {
         throw new UnauthorizedException(
           'Please login first to find best accommodation?',
         );
-
       if (!payload.full_name)
         throw new BadRequestException('Please provide your full name');
       if (!payload.country)
@@ -113,29 +112,28 @@ export class ReservationService {
       });
 
       // Create Khalti payment
-      const formData = {
-        return_url: 'http://localhost:5173/my-reservation',
-        website_url: 'http://localhost:5173',
-        amount: 100,
-        purchase_order_id: reservation.id,
-        purchase_order_name: 'Hotel Reservation',
-      };
+      // const formData = {
+      //   return_url: 'http://localhost:5173/my-reservation',
+      //   website_url: 'http://localhost:5173',
+      //   amount: 100,
+      //   purchase_order_id: reservation.id,
+      //   purchase_order_name: 'Hotel Reservation',
+      // };
 
-      const redirect = await this.callKhalti(formData);
+      // const redirect = await this.callKhalti(formData);
 
-      await queryRunner.manager.getRepository(Payment).save({
-        amount: formData.amount,
-        khalti_token: '',
-        khalti_mobile: '',
-        payment_type: PaymentType.KHALTI,
-        payment_status: PaymentStatus.COMPLETED,
-        reservation_id: reservation.id,
-        total_amount: total_amount + formData.amount,
-      });
+      // await queryRunner.manager.getRepository(Payment).save({
+      //   amount: formData.amount,
+      //   khalti_token: '',
+      //   khalti_mobile: '',
+      //   payment_type: PaymentType.KHALTI,
+      //   payment_status: PaymentStatus.COMPLETED,
+      //   reservation_id: reservation.id,
+      //   total_amount: total_amount + formData.amount,
+      // });
 
       reservation.status = ReservationStatus.APPROVED;
       // Logging after reservation approval
-      console.log('Reservation approved:', reservation);
 
       // -----------SEND MAIL AFTER PAYMENT SUCCESSFULL----------------
       sendMail({
@@ -316,7 +314,10 @@ export class ReservationService {
       throw new BadRequestException('User not found to get reservatiion?');
     return await this.dataSource
       .getRepository(Reservation)
-      .find({ where: { user_id: user.id } });
+      .createQueryBuilder('reservation')
+      .leftJoinAndSelect('reservation.hotel', 'hotel')
+      .where('reservation.user_id =:userId', { userId: user.id })
+      .getMany();
   }
 
   // ---------- GET ALL RESERVATIONS(HOTEL-ADMIN) ----------
