@@ -1,4 +1,3 @@
-import { Reservation } from 'src/reservation/entities/reservation.entity';
 import { User } from 'src/users/entities/user.entity';
 
 import {
@@ -43,12 +42,4 @@ export class Notification {
   @ManyToOne(() => User, (user) => user.notifications, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
-
-  @Column({ nullable: true })
-  reservation_id: string;
-  @ManyToOne(() => Reservation, (reservation) => reservation.notifications, {
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn({ name: 'reservation_id' })
-  reservation: Reservation;
 }

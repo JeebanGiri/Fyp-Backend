@@ -2,7 +2,6 @@ import { Hotel } from 'src/hotel/entities/hotel.entity';
 // import { Report } from 'src/reports/entities/reports.entity';
 import { RoomType, Rooms } from 'src/rooms/entities/rooms.entity';
 import { User } from 'src/users/entities/user.entity';
-import { Notification } from 'src/notification/entities/notification.entity';
 
 import {
   Column,
@@ -10,7 +9,6 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -98,9 +96,4 @@ export class Reservation {
   @ManyToOne(() => Rooms, (rooms) => rooms.reservation, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'room_id' })
   rooms: Rooms;
-
-  @OneToMany(() => Notification, (notifications) => notifications.reservation, {
-    cascade: true,
-  })
-  notifications: Notification[];
 }
