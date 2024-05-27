@@ -96,7 +96,7 @@ export class HotelService {
     user: User,
     hotel_id: string,
     payload: UpdateHotelDto,
-    files: Express.Multer.File[],
+    files?: Express.Multer.File[],
   ) {
     // Get the hotel
     const where = { id: hotel_id };
@@ -160,7 +160,7 @@ export class HotelService {
       .getRepository(Hotel)
       .save({ ...hotel, ...payload });
 
-    return { message: 'Hotel updated successfully.', shop: updatedHotel };
+    return { message: 'Hotel updated successfully.', hotel: updatedHotel };
   }
 
   // ------FIND HOTEL BY ID-------

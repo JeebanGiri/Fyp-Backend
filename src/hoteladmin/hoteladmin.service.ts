@@ -15,12 +15,17 @@ import { OTPType } from 'src/otp/entities/otp.entity';
 import { sendMail } from 'src/@helpers/mail';
 import { defaultMailTemplate } from 'src/@helpers/mail-templates/default.mail-template';
 import { JwtService } from '@nestjs/jwt';
-import { Hotel } from 'src/hotel/entities/hotel.entity';
+import { Hotel, HotelApproveStatus } from 'src/hotel/entities/hotel.entity';
 import { CreateHotelDto, UpdateHotelDto } from 'src/hotel/dto/hotel.dto';
 import { HotelAdminDocumentDetails } from './entities/hoteladmin-document-details';
 import { HotelAdminPaymentDetails } from './entities/hoteladmin-payment-details';
 import { RoomAvailiability, Rooms } from 'src/rooms/entities/rooms.entity';
 import { Reservation } from 'src/reservation/entities/reservation.entity';
+import {
+  Notification,
+  NotificationType,
+} from 'src/notification/entities/notification.entity';
+import { FirebaseService } from 'src/firebase/firebase.service';
 
 @Injectable()
 export class HotelAdminService {
@@ -28,6 +33,7 @@ export class HotelAdminService {
     private dataSource: DataSource,
     private otpService: OtpService,
     private jwtService: JwtService,
+    private readonly firebaseService: FirebaseService,
   ) {}
 
   // ---------- REGISTER Hotel Admin----------
@@ -167,7 +173,7 @@ export class HotelAdminService {
 
   // --------REGISTER HOTEL -------------
   async registerHotel(
-    user_id: string,
+    user: User,
     payload: CreateHotelDto,
     files: Express.Multer.File[],
   ) {
@@ -204,7 +210,7 @@ export class HotelAdminService {
     // Check if Hotel Admin exists
     const hotelExist = await this.dataSource
       .getRepository(Hotel)
-      .findOne({ where: { user_id: user_id } });
+      .findOne({ where: { user_id: user.id } });
     if (hotelExist) throw new BadRequestException('User already have a Hotel');
 
     const { account_name, account_number, bank_name, branch_name, ...res } =
@@ -217,8 +223,7 @@ export class HotelAdminService {
     hotel.avatar = payload.avatar;
     hotel.documents = payload.documents;
     hotel.is_verified = true;
-    // hotel.status = HotelApproveStatus.APPROVED;
-    hotel.user_id = user_id;
+    hotel.user_id = user.id;
     hotel.description = payload.description;
     await this.dataSource.getRepository(Hotel).save(hotel);
 
@@ -227,13 +232,13 @@ export class HotelAdminService {
       .getRepository(HotelAdminDocumentDetails)
       .save({
         ...payload,
-        user_id: user_id,
+        user_id: user.id,
         hotel_id: hotel.id,
       });
 
     // create bank details of the Hotel Admin
     await this.dataSource.manager.getRepository(HotelAdminPaymentDetails).save({
-      user_id: user_id,
+      user_id: user.id,
       hotel_id: hotel.id,
       account_name,
       account_number,
@@ -241,6 +246,30 @@ export class HotelAdminService {
       branch_name,
       ...res,
     });
+
+    const userinfo = await this.dataSource
+      .getRepository(User)
+      .findOne({ where: { id: user.id } });
+
+    const receiver = await this.dataSource
+      .getRepository(User)
+      .findOne({ where: { role: UserRole.super_admin } });
+
+    const title = 'Hotel Added';
+    const body = `New Hotel is Added by ${userinfo.full_name}.`;
+
+    await this.dataSource.getRepository(Notification).save({
+      title: title,
+      body: body,
+      user_id: receiver.id,
+      notification_type: NotificationType.message,
+    });
+
+    await this.firebaseService.sendPushNotifications([receiver.id], {
+      title,
+      body,
+    });
+
     return {
       message:
         'Hotel Details has been added successfully! Please wait for Super Admin Approval.',
@@ -264,7 +293,7 @@ export class HotelAdminService {
     user: User,
     hotel_id: string,
     payload: UpdateHotelDto,
-    files: Express.Multer.File[],
+    files?: Express.Multer.File[],
   ) {
     // Get the hotel of the hotel admin
     const hotel = await this.dataSource.manager.getRepository(Hotel).findOne({
@@ -304,6 +333,7 @@ export class HotelAdminService {
     await this.dataSource.manager.getRepository(Hotel).save({
       ...payload,
       id: hotel.id,
+      status: HotelApproveStatus.PENDING,
     });
 
     const hotelAdminDocumentDetails = await this.dataSource.manager
@@ -329,22 +359,21 @@ export class HotelAdminService {
 
   // -----------GET TOTAL REGISTERED ROOMS---------------
   async getTotalRooms(user: User) {
-    console.log(user.id);
     if (!user) throw new BadRequestException('Hotel Not Found!');
-
     const hotel = await this.dataSource
       .getRepository(Hotel)
       .findOne({ where: { user_id: user.id } });
 
     if (hotel) {
-      const rooms = await this.dataSource.getRepository(Rooms).findOne({
+      const rooms = await this.dataSource.getRepository(Rooms).findAndCount({
         where: {
           hotel_id: hotel.id,
           room_status: RoomAvailiability.AVAILABLE,
         },
       });
       if (!rooms) throw new BadRequestException('Rooms not Found.');
-      return await this.dataSource.getRepository(Rooms).count();
+
+      return rooms;
     }
   }
 
@@ -360,18 +389,22 @@ export class HotelAdminService {
   }
 
   // -----------GET TOTAL INCOME---------
-  async findTotalIncome(user_id: string) {
+  async findTotalIncome(user: User) {
     const hotel = await this.dataSource
       .getRepository(Hotel)
-      .findOne({ where: { user_id: user_id } });
+      .findOne({ where: { user_id: user.id } });
+
     if (!hotel) throw new BadRequestException('Hotel Not Found');
+
     const reservation = await this.dataSource
       .getRepository(Reservation)
       .find({ where: { hotel_id: hotel.id } });
+
     if (!reservation)
       throw new BadRequestException(
         'Your Hotel is not reserved by anyone yet!',
       );
+
     const totalIncome = reservation.reduce((total, reservation) => {
       return total + reservation.total_amount;
     }, 0);
@@ -380,15 +413,18 @@ export class HotelAdminService {
   }
 
   // ----------GET ALL CUSTOMER------------ -
-  async findTotalCustomer(user_id: string) {
+  async findTotalCustomer(user: User) {
     const hotel = await this.dataSource
       .getRepository(Hotel)
-      .findOne({ where: { user_id: user_id } });
+      .findOne({ where: { user_id: user.id } });
+
     if (!hotel) throw new BadRequestException('Hotel Not Found!');
+
     const reservations = await this.dataSource
       .getRepository(Reservation)
       .find({ where: { hotel_id: hotel.id } });
     return reservations;
+
     // const customer_id = reservations.map((customer) => customer.user_id);
     // const uniqueCustomerIds = Array.from(
     //   new Set(reservations.map((reservation) => reservation.customer_id)),
@@ -396,17 +432,16 @@ export class HotelAdminService {
     // return uniqueCustomerIds;
   }
 
-  async getTotalBooking(user_id: string) {
-    if (!user_id) throw new BadRequestException('User Not Found..');
+  async getTotalBooking(loggedUser: User) {
+    if (!loggedUser) throw new BadRequestException('User Not Found..');
     const hotel = await this.dataSource
       .getRepository(Hotel)
-      .findOne({ where: { user_id: user_id } });
+      .findOne({ where: { user_id: loggedUser.id } });
 
     if (!hotel) throw new BadRequestException('Hotel Not Found');
     const reservation = await this.dataSource
       .getRepository(Reservation)
       .findAndCount({ where: { hotel_id: hotel.id } });
-    console.log(reservation);
     return reservation;
   }
 }

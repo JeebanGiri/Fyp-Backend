@@ -5,6 +5,7 @@ import * as firebase from 'firebase-admin';
 import { Printer } from 'src/@helpers/printer';
 import { CreateFirebaseNotificationTokenDto } from './dto/firebase.dto';
 import { FirebaseToken } from './entities/firebase-notification-token.entity';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class FirebaseService {
@@ -23,21 +24,22 @@ export class FirebaseService {
   }
 
   // ---------- SAVE NEW TOKEN ----------
-  async createToken(
-    user_id: string,
-    payload: CreateFirebaseNotificationTokenDto,
-  ) {
+  async createToken(user: User, payload: CreateFirebaseNotificationTokenDto) {
     const existingToken = await this.dataSource
       .getRepository(FirebaseToken)
-      .find({ where: { user_id } });
+      .find({
+        where: {
+          user_id: user.id,
+          notification_token: payload.notification_token,
+        },
+      });
 
-    console.log(existingToken, 'Token');
     if (existingToken.length > 0) {
       throw new BadRequestException('Token exits');
     }
     // If the user does not have a token, save the new token
     await this.dataSource.getRepository(FirebaseToken).save({
-      user_id,
+      user_id: user.id,
       device_type: payload.device_type,
       notification_token: payload.notification_token,
     });
@@ -58,33 +60,36 @@ export class FirebaseService {
     );
     return { message: 'Token updated.' };
   }
+
   // ---------- SEND PUSH NOTIFICATION TO MULTIPLE USERS ----------
   async sendPushNotifications(
     user_ids: string[],
     payload: { title: string; body: string },
   ) {
     const tokens = await this.dataSource.manager.find(FirebaseToken, {
-      where: { user_id: In(user_ids), is_active: true },
+      where: { user_id: In(user_ids) },
     });
+    console.log('Tokens', tokens);
     for (const token of tokens) {
-      await firebase
+      const data = await firebase
         .messaging()
         .send({
           token: token.notification_token,
           notification: {
             title: payload.title,
             body: payload.body,
-            // imageUrl: 'https://d1m8r2h4y17msp.cloudfront.net/public/others/logo.svg',
           },
-          android: { priority: 'high' },
         })
         .catch((error) => {
           Printer('FIREBASE NOTIFICATION ERROR: ', error);
         });
+      console.log(data);
     }
     return { message: 'Push notification sent.' };
   }
+
   // ---------- SEND BROADCAST PUSH NOTIFICATION ----------
+
   async sendBroadcastPushNotification(payload: {
     title: string;
     body: string;
@@ -110,6 +115,7 @@ export class FirebaseService {
     }
     return { message: 'Push notification sent.' };
   }
+
   // ---------- DELETE TOKEN ----------
   async deleteToken(user_id: string, token_id: string) {
     await this.dataSource.manager.update(
@@ -120,3 +126,79 @@ export class FirebaseService {
     return { message: 'Token deleted.' };
   }
 }
+
+// async sendPushNotifications(
+//   user_ids: string[],
+//   payload: { title: string; body: string },
+// ) {
+//   const tokens = await this.dataSource.manager.find(FirebaseToken, {
+//     where: { user_id: In(user_ids), is_active: true },
+//   });
+
+//   for (const token of tokens) {
+//     try {
+//       await firebase.messaging().send({
+//         token: token.notification_token,
+//         notification: {
+//           title: payload.title,
+//           body: payload.body,
+//         },
+//         android: { priority: 'high' },
+//       });
+//     } catch (error) {
+//       if (error.code === 'messaging/registration-token-not-registered') {
+//         // Handle the case when the token is invalid
+//         await this.dataSource.manager.update(
+//           FirebaseToken,
+//           { id: token.id },
+//           { is_active: false },
+//         );
+//         Printer(
+//           'FIREBASE NOTIFICATION ERROR: Token invalid, deactivated in database',
+//           error,
+//         );
+//       } else {
+//         Printer('FIREBASE NOTIFICATION ERROR: ', error);
+//       }
+//     }
+//   }
+//   return { message: 'Push notification sent.' };
+// }
+
+// async sendBroadcastPushNotification(payload: {
+//   title: string;
+//   body: string;
+// }) {
+//   const tokens = await this.dataSource.manager.find(FirebaseToken, {
+//     where: { is_active: true },
+//   });
+
+//   for (const token of tokens) {
+//     try {
+//       await firebase.messaging().send({
+//         token: token.notification_token,
+//         notification: {
+//           title: payload.title,
+//           body: payload.body,
+//         },
+//         android: { priority: 'high' },
+//       });
+//     } catch (error) {
+//       if (error.code === 'messaging/registration-token-not-registered') {
+//         // Handle the case when the token is invalid
+//         await this.dataSource.manager.update(
+//           FirebaseToken,
+//           { id: token.id },
+//           { is_active: false },
+//         );
+//         Printer(
+//           'FIREBASE NOTIFICATION ERROR: Token invalid, deactivated in database',
+//           error,
+//         );
+//       } else {
+//         Printer('FIREBASE NOTIFICATION ERROR: ', error);
+//       }
+//     }
+//   }
+//   return { message: 'Push notification sent.' };
+// }

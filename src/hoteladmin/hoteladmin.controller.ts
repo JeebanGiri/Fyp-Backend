@@ -76,11 +76,11 @@ export class HotelAdminController {
   @ApiBearerAuth('JWT-auth')
   @Roles(UserRole.hotel_admin)
   registerHotel(
-    @GetUser('id') user_id: string,
+    @GetUser() user: User,
     @Body() payload: CreateHotelDto,
     @UploadedFiles() files: Express.Multer.File[],
   ) {
-    return this.hotelAdminService.registerHotel(user_id, payload, files);
+    return this.hotelAdminService.registerHotel(user, payload, files);
   }
 
   // ---------GET HOTEL DETAILS (HOTEL ADMIN)----------------
@@ -104,7 +104,6 @@ export class HotelAdminController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.hotel_admin)
   getAllRooms(@GetUser() user: User) {
-    console.log(user.id);
     return this.hotelAdminService.getTotalRooms(user);
   }
 
@@ -116,8 +115,8 @@ export class HotelAdminController {
   })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.hotel_admin)
-  gettotalReservation(@GetUser('user_id') user_id: string) {
-    return this.hotelAdminService.getTotalBooking(user_id);
+  gettotalReservation(@GetUser() user: User) {
+    return this.hotelAdminService.getTotalBooking(user);
   }
 
   // -----GET TOTAL INCOME----------------
@@ -140,8 +139,8 @@ export class HotelAdminController {
   })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.hotel_admin)
-  getTotalIncome(@GetUser('user_id') user_id: string) {
-    return this.hotelAdminService.findTotalIncome(user_id);
+  getTotalIncome(@GetUser() user: User) {
+    return this.hotelAdminService.findTotalIncome(user);
   }
 
   // ------GET TOTAL Customer------------
@@ -152,12 +151,11 @@ export class HotelAdminController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.hotel_admin)
   @Get('find/customer')
-  getCustomer(@GetUser('user_id') user_id: string) {
-    return this.hotelAdminService.findTotalCustomer(user_id);
+  getCustomer(@GetUser() user: User) {
+    return this.hotelAdminService.findTotalCustomer(user);
   }
 
   //-------------UPDATE HOTEL ADMIN DETAILS--------------
-
   @Patch('update-hotel/:hotel_id')
   @ApiOperation({
     summary: 'Update a Hotel',

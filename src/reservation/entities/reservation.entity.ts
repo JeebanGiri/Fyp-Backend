@@ -1,5 +1,4 @@
 import { Hotel } from 'src/hotel/entities/hotel.entity';
-// import { Report } from 'src/reports/entities/reports.entity';
 import { RoomType, Rooms } from 'src/rooms/entities/rooms.entity';
 import { User } from 'src/users/entities/user.entity';
 

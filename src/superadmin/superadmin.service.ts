@@ -5,7 +5,7 @@ import {
   EditHotelAdminDetailDto,
   RegisterAdminDto,
 } from './dto/super-admin.dto';
-import { DataSource, Point } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { Hotel, HotelApproveStatus } from 'src/hotel/entities/hotel.entity';
 import * as argon from 'argon2';
 import { HotelAdminDocumentDetails } from 'src/hoteladmin/entities/hoteladmin-document-details';
@@ -15,10 +15,18 @@ import { defaultMailTemplate } from 'src/@helpers/mail-templates/default.mail-te
 import { Reservation } from 'src/reservation/entities/reservation.entity';
 import { Rooms } from 'src/rooms/entities/rooms.entity';
 import { PaginationDto } from 'src/hotel/dto/pagination.dto';
+import { FirebaseService } from 'src/firebase/firebase.service';
+import {
+  Notification,
+  NotificationType,
+} from 'src/notification/entities/notification.entity';
 
 @Injectable()
 export class SuperadminService {
-  constructor(private dataSource: DataSource) {}
+  constructor(
+    private dataSource: DataSource,
+    private readonly firebaseService: FirebaseService,
+  ) {}
 
   // ---------- REGISTER HOTEL ADMIN ----------------
 
@@ -280,9 +288,28 @@ export class SuperadminService {
       // Save the updated hotel entity
       await this.dataSource.getRepository(Hotel).save(hotel);
 
+      const title = 'Hotel Approve';
+      const body = `You hotel has been approved by admin.`;
+
+      const receiver = await this.dataSource
+        .getRepository(User)
+        .findOne({ where: { role: UserRole.hotel_admin } });
+
+      await this.dataSource.getRepository(Notification).save({
+        title: title,
+        body: body,
+        user_id: receiver.id,
+        notification_type: NotificationType.message,
+      });
+
+      await this.firebaseService.sendPushNotifications([receiver.id], {
+        title,
+        body,
+      });
+
       // Return success message
       return {
-        message: 'Hotel Verified! Please Login And Manage Your Property!',
+        message: 'Hotel Verified!',
       };
     }
 

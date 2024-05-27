@@ -14,6 +14,8 @@ import {
   CreateFirebaseNotificationTokenDto,
   UpdateFirebaseNotificationTokenDto,
 } from './dto/firebase.dto';
+// import { RolesGuard } from 'src/@Guards/roles.guard';
+import { User } from 'src/users/entities/user.entity';
 
 @Controller('firebase')
 export class FirebaseController {
@@ -24,11 +26,10 @@ export class FirebaseController {
   @ApiOperation({ summary: 'Create new token' })
   @UseGuards(JwtAuthGuard)
   createToken(
-    @GetUser('id') user_id: string,
+    @GetUser() user: User,
     @Body() payload: CreateFirebaseNotificationTokenDto,
   ) {
-    console.log(payload.device_type, payload.notification_token, 'Token');
-    return this.firebaseService.createToken(user_id, payload);
+    return this.firebaseService.createToken(user, payload);
   }
 
   // ---------- UPDATE TOKEN ----------

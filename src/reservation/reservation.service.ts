@@ -112,25 +112,25 @@ export class ReservationService {
       });
 
       // Create Khalti payment
-      // const formData = {
-      //   return_url: 'http://localhost:5173/my-reservation',
-      //   website_url: 'http://localhost:5173',
-      //   amount: 100,
-      //   purchase_order_id: reservation.id,
-      //   purchase_order_name: 'Hotel Reservation',
-      // };
+      const formData = {
+        return_url: 'http://localhost:5173/my-reservation',
+        website_url: 'http://localhost:5173',
+        amount: 100,
+        purchase_order_id: reservation.id,
+        purchase_order_name: 'Hotel Reservation',
+      };
 
-      // const redirect = await this.callKhalti(formData);
+      const redirect = await this.callKhalti(formData);
 
-      // await queryRunner.manager.getRepository(Payment).save({
-      //   amount: formData.amount,
-      //   khalti_token: '',
-      //   khalti_mobile: '',
-      //   payment_type: PaymentType.KHALTI,
-      //   payment_status: PaymentStatus.COMPLETED,
-      //   reservation_id: reservation.id,
-      //   total_amount: total_amount + formData.amount,
-      // });
+      await queryRunner.manager.getRepository(Payment).save({
+        amount: formData.amount,
+        khalti_token: '',
+        khalti_mobile: '',
+        payment_type: PaymentType.KHALTI,
+        payment_status: PaymentStatus.COMPLETED,
+        reservation_id: reservation.id,
+        total_amount: total_amount + formData.amount,
+      });
 
       reservation.status = ReservationStatus.APPROVED;
       // Logging after reservation approval
@@ -151,7 +151,7 @@ export class ReservationService {
       return {
         message: 'Booked Sucessfully',
         reservation: reservation,
-        // redirect,
+        redirect,
       };
     } catch (error: any) {
       // Rollback the transaction in case of an error
@@ -338,12 +338,26 @@ export class ReservationService {
       .findOne({ where: { user_id: user.id } });
     if (!hotel) throw new BadRequestException('Hotel Not Found');
 
-    const reservation = await this.dataSource
-      .getRepository(Reservation)
-      .findAndCount({ take, skip });
+    // const reservation = await this.dataSource
+    //   .getRepository(Reservation)
+    //   .findAndCount({ take, skip });
 
-    if (!reservation) throw new BadRequestException('Reservation Not Found.');
-    return paginateResponse(reservation, page, take);
+    // if (!reservation) throw new BadRequestException('Reservation Not Found.');
+    // return paginateResponse(reservation, page, take);
+
+    // Get reservations for the specific hotel.
+    const [reservations, total] = await this.dataSource
+      .getRepository(Reservation)
+      .findAndCount({
+        where: { hotel_id: hotel.id },
+        take,
+        skip,
+      });
+
+    if (!reservations.length)
+      throw new BadRequestException('No reservations found.');
+
+    return paginateResponse({ data: reservations, total }, page, take);
   }
 
   // ---------UPDATE RESERVATION (HOTEL ADMIN)-----------
@@ -481,6 +495,7 @@ export class ReservationService {
         `Reservation can't be cancelled. current status: ${reservationStatus} `,
       );
     }
+
     const cancelledReservation = await this.dataSource
       .getRepository(Reservation)
       .save({

@@ -41,10 +41,6 @@ export class RoomsService {
         .getRepository(Hotel)
         .findOne({ where: { id: hotel_id, user_id: user_id } });
 
-      console.log(hotel, 'hotel');
-      console.log(hotel_id, 'hotel');
-      console.log(user_id, 'user');
-
       if (!hotel)
         throw new BadRequestException('Hotel Not Found... for adding rooms..');
 
@@ -58,7 +54,6 @@ export class RoomsService {
         ));
 
         await this.validateRoomNumberUniqueness(payload.room_number, hotel.id);
-
         const saveRooms = await this.dataSource.getRepository(Rooms).save({
           room_name: payload.room_name,
           room_number: payload.room_number,
@@ -72,7 +67,7 @@ export class RoomsService {
 
         await this.dataSource.getRepository(Rooms).save(saveRooms);
         const title = 'Add Room';
-        const body = 'Room Added Notification';
+        const body = 'Room is Added Successfully.';
 
         await this.dataSource.getRepository(Notification).save({
           title: title,
@@ -81,11 +76,16 @@ export class RoomsService {
           notification_type: NotificationType.message,
         });
 
-        return this.firebaseService.sendPushNotifications([user_id], {
+        const receiver = await this.dataSource
+          .getRepository(User)
+          .findOne({ where: { role: UserRole.super_admin } });
+
+        await this.firebaseService.sendPushNotifications([receiver.id], {
           title,
           body,
         });
-        // return { message: 'Room Added Successfully!' };
+
+        return { message: 'Room Added Successfully!' };
       }
     } catch (error) {
       console.log(error);
@@ -147,7 +147,7 @@ export class RoomsService {
       .save({ ...roomInfo, ...payload });
 
     const title = 'Update Room';
-    const body = 'Room Updated Notification';
+    const body = 'Room Updated Successfully!';
 
     await this.dataSource.getRepository(Notification).save({
       title: title,
@@ -156,7 +156,11 @@ export class RoomsService {
       notification_type: NotificationType.message,
     });
 
-    await this.firebaseService.sendPushNotifications([user.id], {
+    const receiver = await this.dataSource
+      .getRepository(User)
+      .findOne({ where: { role: UserRole.super_admin } });
+
+    await this.firebaseService.sendPushNotifications([receiver.id], {
       title,
       body,
     });

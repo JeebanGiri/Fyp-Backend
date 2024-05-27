@@ -2,11 +2,9 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsArray,
   IsDateString,
-  IsInt,
   IsLatitude,
   IsLongitude,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
   IsPhoneNumber,
   IsString,
@@ -141,8 +139,9 @@ export class UpdateHotelDto {
   checkin_checkout?: ITimeRange;
 
   @ApiPropertyOptional({ type: 'array', format: 'binary', isArray: true })
-  @IsArray()
   @IsOptional()
+  @IsArray()
+  @IsNotEmpty()
   documents?: any[];
 
   @ApiPropertyOptional()
