@@ -363,6 +363,9 @@ export class HotelAdminService {
     const hotel = await this.dataSource
       .getRepository(Hotel)
       .findOne({ where: { user_id: user.id } });
+    if (!hotel) {
+      return 0;
+    }
 
     if (hotel) {
       const rooms = await this.dataSource.getRepository(Rooms).findAndCount({
@@ -373,7 +376,7 @@ export class HotelAdminService {
       });
       if (!rooms) throw new BadRequestException('Rooms not Found.');
 
-      return rooms;
+      return rooms || 0;
     }
   }
 
@@ -383,9 +386,9 @@ export class HotelAdminService {
       .getRepository(Hotel)
       .findOne({ where: { user_id: user_id } });
 
-    if (!hotel) throw new BadRequestException('Hotel not found.');
+    if (!hotel) throw new BadRequestException('Hotel not found.') || 0;
     const rating = hotel.rating_value;
-    return rating;
+    return rating || 0;
   }
 
   // -----------GET TOTAL INCOME---------
@@ -394,22 +397,25 @@ export class HotelAdminService {
       .getRepository(Hotel)
       .findOne({ where: { user_id: user.id } });
 
-    if (!hotel) throw new BadRequestException('Hotel Not Found');
+    if (!hotel) {
+      return 0;
+    }
 
     const reservation = await this.dataSource
       .getRepository(Reservation)
       .find({ where: { hotel_id: hotel.id } });
 
     if (!reservation)
-      throw new BadRequestException(
-        'Your Hotel is not reserved by anyone yet!',
+      throw (
+        new BadRequestException('Your Hotel is not reserved by anyone yet!') ||
+        0
       );
 
     const totalIncome = reservation.reduce((total, reservation) => {
       return total + reservation.total_amount;
     }, 0);
 
-    return totalIncome;
+    return totalIncome || 0;
   }
 
   // ----------GET ALL CUSTOMER------------ -
@@ -418,11 +424,12 @@ export class HotelAdminService {
       .getRepository(Hotel)
       .findOne({ where: { user_id: user.id } });
 
-    if (!hotel) throw new BadRequestException('Hotel Not Found!');
-
+    if (!hotel) {
+      return 0;
+    }
     const reservations = await this.dataSource
       .getRepository(Reservation)
-      .find({ where: { hotel_id: hotel.id } });
+      .findAndCount({ where: { hotel_id: hotel.id } });
     return reservations;
 
     // const customer_id = reservations.map((customer) => customer.user_id);
@@ -438,10 +445,13 @@ export class HotelAdminService {
       .getRepository(Hotel)
       .findOne({ where: { user_id: loggedUser.id } });
 
-    if (!hotel) throw new BadRequestException('Hotel Not Found');
+    if (!hotel) {
+      // throw new BadRequestException('Hotel Not Found') || 0;
+      return 0;
+    }
     const reservation = await this.dataSource
       .getRepository(Reservation)
       .findAndCount({ where: { hotel_id: hotel.id } });
-    return reservation;
+    return reservation || 0;
   }
 }

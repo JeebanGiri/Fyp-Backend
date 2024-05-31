@@ -79,7 +79,7 @@ export class AuthService {
 
     if (!user)
       throw new UnauthorizedException({
-        error: { message: 'Invalid Email.' },
+        error: { message: 'Could not find account.' },
       });
 
     // Validate password
