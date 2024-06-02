@@ -39,7 +39,6 @@ export class HotelAdminService {
   // ---------- REGISTER Hotel Admin----------
   async register(payload: RegisterHotelAdminDto) {
     const { email, password, ...res } = payload;
-    console.log(payload);
 
     const emailExists = await this.dataSource
       .getRepository(User)
@@ -57,8 +56,6 @@ export class HotelAdminService {
       role: UserRole.hotel_admin,
       ...res,
     });
-
-    console.log('Reach');
 
     // Generate and send OTP
     const otp = await this.otpService.createOtp(
@@ -177,104 +174,122 @@ export class HotelAdminService {
     payload: CreateHotelDto,
     files: Express.Multer.File[],
   ) {
-    if (!files)
-      throw new BadRequestException('Upload "avatar"* and "cover" files');
+    const queryRunner = await this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      if (!files)
+        throw new BadRequestException('Upload "avatar"* and "cover" files');
 
-    if (!files['citizenship_front'] || !files['citizenship_back']) {
-      throw new BadRequestException(
-        'Hotel Admin document details are required.',
-      );
-    }
-    payload.citizenship_front = '/' + files['citizenship_front'][0].filename;
-    payload.citizenship_back = '/' + files['citizenship_back'][0].filename;
+      if (!files['citizenship_front'] || !files['citizenship_back']) {
+        throw new BadRequestException(
+          'Hotel Admin document details are required.',
+        );
+      }
+      payload.citizenship_front = '/' + files['citizenship_front'][0].filename;
+      payload.citizenship_back = '/' + files['citizenship_back'][0].filename;
 
-    if (!files['avatar']) throw new BadRequestException('Avatar is required');
-    if (!files['cover']) throw new BadRequestException('Cover is required');
+      if (!files['avatar']) throw new BadRequestException('Avatar is required');
+      if (!files['cover']) throw new BadRequestException('Cover is required');
 
-    if (!files['documents'])
-      throw new BadRequestException('Documents are required');
+      if (!files['documents'])
+        throw new BadRequestException('Documents are required');
 
-    payload.avatar = '/' + files['avatar'][0].filename;
+      payload.avatar = '/' + files['avatar'][0].filename;
 
-    if (files['cover']) {
-      payload.cover = '/' + files['cover'][0].filename;
-    }
-    if (files['documents'] && files['documents'].length > 0) {
-      payload.documents = [];
-      files['documents'].forEach((documentFile) => {
-        const documentPath = documentFile.filename;
-        payload.documents.push(documentPath);
-      });
-    }
+      if (files['cover']) {
+        payload.cover = '/' + files['cover'][0].filename;
+      }
+      if (files['documents'] && files['documents'].length > 0) {
+        payload.documents = [];
+        files['documents'].forEach((documentFile) => {
+          const documentPath = documentFile.filename;
+          payload.documents.push(documentPath);
+        });
+      }
 
-    // Check if Hotel Admin exists
-    const hotelExist = await this.dataSource
-      .getRepository(Hotel)
-      .findOne({ where: { user_id: user.id } });
-    if (hotelExist) throw new BadRequestException('User already have a Hotel');
+      // Check if Hotel Admin exists
+      const hotelExist = await this.dataSource
+        .getRepository(Hotel)
+        .findOne({ where: { user_id: user.id } });
+      if (hotelExist)
+        throw new BadRequestException('User already have a Hotel');
 
-    const { account_name, account_number, bank_name, branch_name, ...res } =
-      payload;
-    const hotel = new Hotel();
-    hotel.name = payload.hotel_name;
-    hotel.address = payload.address;
-    hotel.cover = payload.cover;
-    hotel.phone_number = payload.phone_number;
-    hotel.avatar = payload.avatar;
-    hotel.documents = payload.documents;
-    hotel.is_verified = true;
-    hotel.user_id = user.id;
-    hotel.description = payload.description;
-    await this.dataSource.getRepository(Hotel).save(hotel);
+      const { account_name, account_number, bank_name, branch_name, ...res } =
+        payload;
+      const hotel = new Hotel();
+      hotel.name = payload.hotel_name;
+      hotel.address = payload.address;
+      hotel.cover = payload.cover;
+      hotel.phone_number = payload.phone_number;
+      hotel.avatar = payload.avatar;
+      hotel.documents = payload.documents;
+      hotel.is_verified = true;
+      hotel.user_id = user.id;
+      hotel.description = payload.description;
+      await queryRunner.manager.getRepository(Hotel).save(hotel);
 
-    // create document details of the Hotel Admin
-    await this.dataSource.manager
-      .getRepository(HotelAdminDocumentDetails)
-      .save({
+      // create document details of the Hotel Admin
+      await queryRunner.manager.getRepository(HotelAdminDocumentDetails).save({
         ...payload,
         user_id: user.id,
         hotel_id: hotel.id,
       });
 
-    // create bank details of the Hotel Admin
-    await this.dataSource.manager.getRepository(HotelAdminPaymentDetails).save({
-      user_id: user.id,
-      hotel_id: hotel.id,
-      account_name,
-      account_number,
-      bank_name,
-      branch_name,
-      ...res,
-    });
+      console.log("Hello");
+      
 
-    const userinfo = await this.dataSource
-      .getRepository(User)
-      .findOne({ where: { id: user.id } });
+      // create bank details of the Hotel Admin
+      await queryRunner.manager.getRepository(HotelAdminPaymentDetails).save({
+        user_id: user.id,
+        hotel_id: hotel.id,
+        account_name,
+        account_number,
+        bank_name,
+        branch_name,
+        ...res,
+      });
+      
 
-    const receiver = await this.dataSource
-      .getRepository(User)
-      .findOne({ where: { role: UserRole.super_admin } });
+      const userinfo = await this.dataSource
+        .getRepository(User)
+        .findOne({ where: { id: user.id } });
 
-    const title = 'Hotel Added';
-    const body = `New Hotel is Added by ${userinfo.full_name}.`;
+      const receiver = await this.dataSource
+        .getRepository(User)
+        .findOne({ where: { role: UserRole.super_admin } });
 
-    await this.dataSource.getRepository(Notification).save({
-      title: title,
-      body: body,
-      user_id: receiver.id,
-      notification_type: NotificationType.message,
-    });
+      const title = 'Hotel Added';
+      const body = `New Hotel is Added by ${userinfo.full_name}.`;
 
-    await this.firebaseService.sendPushNotifications([receiver.id], {
-      title,
-      body,
-    });
+      await queryRunner.manager.getRepository(Notification).save({
+        title: title,
+        body: body,
+        user_id: receiver.id,
+        notification_type: NotificationType.message,
+      });
 
-    return {
-      message:
-        'Hotel Details has been added successfully! Please wait for Super Admin Approval.',
-      hotel,
-    };
+      await this.firebaseService.sendPushNotifications([receiver.id], {
+        title,
+        body,
+      });
+
+      console.log("Hello1");
+      
+      await queryRunner.commitTransaction();
+      return {
+        message:
+          'Hotel Details has been added successfully! Please wait for Super Admin Approval.',
+        hotel,
+      };
+    } catch (error: any) {
+      // Rollback the transaction in case of an error
+      await queryRunner.rollbackTransaction();
+      throw new BadRequestException(error.message);
+    } finally {
+      // Release the query runner resources
+      await queryRunner.release();
+    }
   }
 
   // ------------GET HOTEL ADMIN DETAILS--------------
