@@ -203,7 +203,7 @@ export class HotelController {
     @Query('address') address: string,
     @Query('minPrice') minPrice?: number,
     @Query('maxPrice') maxPrice?: number,
-  ) {
+  ) {    
     return this.hotelService.getHotelByLocation(address, minPrice, maxPrice);
   }
 

@@ -188,45 +188,32 @@ export class HotelService {
     maxPrice?: number,
   ) {
     try {
-      // const hotels = await this.dataSource
-      //   .getRepository(Hotel)
-      //   .createQueryBuilder('hotel')
-      //   .leftJoinAndSelect('hotel.rooms', 'rooms')
-      //   .where('hotel.address ILike :address', { address: `%${address}%` })
-      //   .andWhere('rooms.room_rate BETWEEN :minPrice AND :maxPrice', {
-      //     minPrice,
-      //     maxPrice,
-      //   })
-      //   .getMany();
-      // if (!hotels || hotels.length === 0) {
-      //   this.logger.warn(`No hotels found for address: ${address}`);
-      //   return [];
-      // }
-      // // Extract details of only one room per hotel
-      // const hotelsWithOneRoom = hotels.map((hotel) => ({
-      //   ...hotel,
-      //   rooms: hotel.rooms.length > 0 ? [hotel.rooms[0]] : [], // Get details of only one room per hotel
-      // }));
-
-      // return hotelsWithOneRoom;
-
       let query = this.dataSource
         .getRepository(Hotel)
         .createQueryBuilder('hotel')
         .leftJoinAndSelect('hotel.rooms', 'rooms')
-        .where('hotel.address ILike :address', { address: `%${address}%` });
+        .where('hotel.address ILike :address', { address: `%${address}%` });    
 
-      if (minPrice !== undefined && maxPrice !== undefined) {
-        query = query.andWhere(
-          'rooms.room_rate BETWEEN :minPrice AND :maxPrice',
-          { minPrice, maxPrice },
-        );
-      }
+        // if (minPrice !== undefined && maxPrice !== undefined) {
+        //   query = query.andWhere(
+        //     'rooms.room_rate BETWEEN :minPrice AND :maxPrice',
+        //     { minPrice, maxPrice },
+        //   );        
+        // }
 
-      const hotels = await query.getMany();
+        if (minPrice !== undefined && maxPrice !== undefined) {
+          query = query.andWhere(
+            '(rooms.room_rate BETWEEN :minPrice AND :maxPrice OR rooms.id IS NULL)',
+            { minPrice, maxPrice },
+          );
+        }
+
+      const hotels =await query.getMany();      
 
       if (!hotels || hotels.length === 0) {
         this.logger.warn(`No hotels found for address: ${address}`);
+        console.log("not Found hotel in ktm");
+        
         return [];
       }
 

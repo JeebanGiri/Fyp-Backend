@@ -234,10 +234,7 @@ export class HotelAdminService {
         ...payload,
         user_id: user.id,
         hotel_id: hotel.id,
-      });
-
-      console.log("Hello");
-      
+      });      
 
       // create bank details of the Hotel Admin
       await queryRunner.manager.getRepository(HotelAdminPaymentDetails).save({
