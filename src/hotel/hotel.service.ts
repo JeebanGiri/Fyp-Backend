@@ -194,13 +194,6 @@ export class HotelService {
         .leftJoinAndSelect('hotel.rooms', 'rooms')
         .where('hotel.address ILike :address', { address: `%${address}%` });    
 
-        // if (minPrice !== undefined && maxPrice !== undefined) {
-        //   query = query.andWhere(
-        //     'rooms.room_rate BETWEEN :minPrice AND :maxPrice',
-        //     { minPrice, maxPrice },
-        //   );        
-        // }
-
         if (minPrice !== undefined && maxPrice !== undefined) {
           query = query.andWhere(
             '(rooms.room_rate BETWEEN :minPrice AND :maxPrice OR rooms.id IS NULL)',
