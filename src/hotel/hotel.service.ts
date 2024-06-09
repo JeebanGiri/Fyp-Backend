@@ -10,7 +10,7 @@ import {
   UpdateHotelDto,
 } from './dto/hotel.dto';
 import { DataSource } from 'typeorm';
-import { Hotel } from './entities/hotel.entity';
+import { Hotel, HotelApproveStatus } from './entities/hotel.entity';
 import { Point } from 'geojson';
 import slugify from 'slugify';
 import * as fs from 'fs';
@@ -192,8 +192,9 @@ export class HotelService {
         .getRepository(Hotel)
         .createQueryBuilder('hotel')
         .leftJoinAndSelect('hotel.rooms', 'rooms')
-        .where('hotel.address ILike :address', { address: `%${address}%` });    
-
+        .where('hotel.address ILike :address', { address: `%${address}%` })
+        .andWhere('hotel.status = :status', { status: HotelApproveStatus.APPROVED });
+        
         if (minPrice !== undefined && maxPrice !== undefined) {
           query = query.andWhere(
             '(rooms.room_rate BETWEEN :minPrice AND :maxPrice OR rooms.id IS NULL)',

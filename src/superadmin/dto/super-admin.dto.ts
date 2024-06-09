@@ -93,19 +93,11 @@ export class AddHotelAdminDetailDto {
   @ApiPropertyOptional({ example: 'example.jpg', format: 'binary' })
   cover: any;
 
+  @ApiPropertyOptional({ type: 'array', format: 'binary', isArray: true })
   @IsNotEmpty()
   @IsArray()
-  @ApiPropertyOptional({ type: 'array', format: 'binary', isArray: true })
   @IsOptional()
-  documents?: string[];
-
-  // @ApiPropertyOptional({ example: '27.639302' })
-  // @IsLatitude()
-  // latitude: number;
-
-  // @ApiPropertyOptional({ example: '85.345988' })
-  // @IsLongitude()
-  // longitude: number;
+  documents?: any[];
 
   @ApiProperty({
     example: {
@@ -285,55 +277,3 @@ export class EditHotelAdminDetailDto {
   @IsOptional()
   branch_name: string;
 }
-
-// @ApiPropertyOptional({
-//   example: {
-//     sunday: [
-//       {
-//         open: '10:00am',
-//         close: '2:00pm',
-//       },
-//       {
-//         open: '5:00am',
-//         close: '10:00pm',
-//       },
-//     ],
-
-//     monday: [
-//       {
-//         open: '10:00am',
-//         close: '5:00pm',
-//       },
-//     ],
-//     tuesday: [
-//       {
-//         open: '10:00am',
-//         close: '5:00pm',
-//       },
-//     ],
-//     wednesday: [
-//       {
-//         open: '10:00am',
-//         close: '5:00pm',
-//       },
-//     ],
-//     thursday: [
-//       {
-//         open: '10:00am',
-//         close: '5:00pm',
-//       },
-//     ],
-//     friday: [
-//       {
-//         open: '10:00am',
-//         close: '5:00pm',
-//       },
-//     ],
-//     saturday: [
-//       {
-//         open: '10:00am',
-//         close: '5:00pm',
-//       },
-//     ],
-//   },
-// })

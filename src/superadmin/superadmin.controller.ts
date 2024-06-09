@@ -54,6 +54,7 @@ export class SuperadminController {
   })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.super_admin)
+  @ApiBearerAuth('JWT-Auth')
   @UseInterceptors(
     FileFieldsInterceptor(
       [
@@ -76,8 +77,6 @@ export class SuperadminController {
     @Body() payload: AddHotelAdminDetailDto,
     @UploadedFiles() files: Express.Multer.File[],
   ) {
-    console.log(payload, 'from controlller');
-
     return this.superAdminService.addHotelAdminDetails(payload, files);
   }
 
@@ -128,12 +127,12 @@ export class SuperadminController {
     summary: 'Register a Hotel',
     description: `${UserRole.super_admin}`,
   })
-  // @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.super_admin)
   @ApiBearerAuth('JWT-auth')
   approveHotelDetails(@Param('id') id: string) {
-    console.log(id, "hotel id");
-    
+    console.log(id, 'hotel id');
+
     return this.superAdminService.approveHotelAdminDetails(id);
   }
 

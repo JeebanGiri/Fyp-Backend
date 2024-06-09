@@ -62,7 +62,6 @@ export class HotelAdminService {
       savedUser.id,
       OTPType.emailVerification,
     );
-    console.log('otp', otp);
 
     sendMail({
       to: email,
@@ -234,7 +233,7 @@ export class HotelAdminService {
         ...payload,
         user_id: user.id,
         hotel_id: hotel.id,
-      });      
+      });
 
       // create bank details of the Hotel Admin
       await queryRunner.manager.getRepository(HotelAdminPaymentDetails).save({
@@ -246,7 +245,6 @@ export class HotelAdminService {
         branch_name,
         ...res,
       });
-      
 
       const userinfo = await this.dataSource
         .getRepository(User)
@@ -256,8 +254,8 @@ export class HotelAdminService {
         .getRepository(User)
         .findOne({ where: { role: UserRole.super_admin } });
 
-      const title = 'Hotel Added';
-      const body = `New Hotel is Added by ${userinfo.full_name}.`;
+      const title = 'New Hotel is Listed.';
+      const body = `New Hotel is Listed by ${userinfo.full_name}.`;
 
       await queryRunner.manager.getRepository(Notification).save({
         title: title,
@@ -271,8 +269,6 @@ export class HotelAdminService {
         body,
       });
 
-      console.log("Hello1");
-      
       await queryRunner.commitTransaction();
       return {
         message:
@@ -366,6 +362,29 @@ export class HotelAdminService {
       .getRepository(HotelAdminPaymentDetails)
       .save(hotelAdminPaymentDetails);
 
+    const userinfo = await this.dataSource
+      .getRepository(User)
+      .findOne({ where: { id: user.id } });
+
+    const receiver = await this.dataSource
+      .getRepository(User)
+      .findOne({ where: { role: UserRole.super_admin } });
+
+    const title = 'Hotel Details is Updated.';
+    const body = `A Hotel is Updated by ${userinfo.full_name}.`;
+
+    await this.dataSource.getRepository(Notification).save({
+      title: title,
+      body: body,
+      user_id: receiver.id,
+      notification_type: NotificationType.message,
+    });
+
+    await this.firebaseService.sendPushNotifications([receiver.id], {
+      title,
+      body,
+    });
+
     return { message: 'Hotel Details updated Sucessfully!' };
   }
 
@@ -379,17 +398,16 @@ export class HotelAdminService {
       return 0;
     }
 
-    if (hotel) {
-      const rooms = await this.dataSource.getRepository(Rooms).findAndCount({
-        where: {
-          hotel_id: hotel.id,
-          room_status: RoomAvailiability.AVAILABLE,
-        },
-      });
-      if (!rooms) throw new BadRequestException('Rooms not Found.');
+    // it is an array destructuring and it ignore the first , and only use the second vlaue count.
+    const [, count] = await this.dataSource.getRepository(Rooms).findAndCount({
+      where: {
+        hotel_id: hotel.id,
+        room_status: RoomAvailiability.AVAILABLE,
+      },
+    });
+    if (count === undefined) throw new BadRequestException('Rooms not Found.');
 
-      return rooms || 0;
-    }
+    return [count];
   }
 
   // -----------GET TOTAL Rating---------------
@@ -427,7 +445,7 @@ export class HotelAdminService {
       return total + reservation.total_amount;
     }, 0);
 
-    return totalIncome || 0;
+    return [totalIncome || 0];
   }
 
   // ----------GET ALL CUSTOMER------------ -
@@ -461,9 +479,16 @@ export class HotelAdminService {
       // throw new BadRequestException('Hotel Not Found') || 0;
       return 0;
     }
-    const reservation = await this.dataSource
+    const [, count] = await this.dataSource
       .getRepository(Reservation)
-      .findAndCount({ where: { hotel_id: hotel.id } });
-    return reservation || 0;
+      .findAndCount({
+        where: {
+          hotel_id: hotel.id,
+        },
+      });
+
+    if (count === undefined) throw new BadRequestException('Rooms not Found.');
+
+    return [count];
   }
 }

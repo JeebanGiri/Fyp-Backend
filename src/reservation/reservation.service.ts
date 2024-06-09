@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   BadRequestException,
   HttpException,
@@ -29,13 +28,13 @@ import {
   PaymentStatus,
   PaymentType,
 } from 'src/payment/entities/payment.entity';
-import { Report, ReportStatus } from 'src/reports/entities/reports.entity';
 
 @Injectable()
 export class ReservationService {
   private paymentLinkExpirationTime: number;
 
   constructor(private dataSource: DataSource) {}
+  
   async makeHotelRoomsReservation(
     loggedUser: User,
     hotel_id: string,
@@ -111,11 +110,14 @@ export class ReservationService {
         }),
       });
 
+
+      console.log(reservation.id);      
+      
       // Create Khalti payment
       const formData = {
         return_url: 'http://localhost:5173/my-reservation',
         website_url: 'http://localhost:5173',
-        amount: 100,
+        amount: 1000,
         purchase_order_id: reservation.id,
         purchase_order_name: 'Hotel Reservation',
       };

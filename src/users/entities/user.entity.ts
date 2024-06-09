@@ -86,7 +86,7 @@ export class User {
   @OneToMany(() => OTP, (otp) => otp.user, { cascade: true })
   otps: OTP[];
 
-  @OneToOne(() => Hotel, (hotel) => hotel.user, { cascade: true })
+  @OneToOne(() => Hotel, (hotel) => hotel.user, { cascade: true, onDelete: 'CASCADE' })
   hotel: Hotel;
 
   @OneToMany(() => Reservation, (reservation) => reservation.user, {
@@ -108,7 +108,7 @@ export class User {
   @OneToOne(
     () => HotelAdminPaymentDetails,
     (hoteladminpaymentdetails) => hoteladminpaymentdetails.user,
-    { cascade: true },
+    { cascade: true, onDelete: 'CASCADE' },
   )
   @JoinColumn({ name: 'payment_id' })
   hoteladminpaymentdetails: HotelAdminPaymentDetails;
@@ -119,7 +119,7 @@ export class User {
   @OneToOne(
     () => HotelAdminDocumentDetails,
     (hote_admin_document_details) => hote_admin_document_details.user,
-    { cascade: true },
+    { cascade: true, onDelete: 'CASCADE' },
   )
   @JoinColumn({ name: 'document_details_id' })
   document_detail: HotelAdminDocumentDetails;

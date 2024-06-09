@@ -35,7 +35,7 @@ export class Hotel {
   @Column()
   address: string;
 
-  @Column({ type: 'varchar', length: 500, nullable: true })
+  @Column({ type: 'varchar', length: 1000, nullable: true })
   description?: string;
 
   @Column({ type: 'text' })
@@ -120,7 +120,7 @@ export class Hotel {
   @OneToOne(
     () => HotelAdminPaymentDetails,
     (paymentDetails) => paymentDetails.hotel,
-    { cascade: true },
+    { cascade: true, onDelete: 'CASCADE' },
   )
   @JoinColumn({ name: 'payment_id' })
   payment_detail: HotelAdminPaymentDetails;
@@ -131,7 +131,7 @@ export class Hotel {
   @OneToOne(
     () => HotelAdminDocumentDetails,
     (documentDetails) => documentDetails.hotel,
-    { cascade: true },
+    { cascade: true, onDelete: 'CASCADE' },
   )
   document_detail: HotelAdminDocumentDetails;
 
