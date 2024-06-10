@@ -125,7 +125,6 @@ export class SuperadminService {
         is_verified: true,
       });
 
-
       const { account_name, account_number, bank_name, branch_name, ...res } =
         payload;
 
@@ -142,14 +141,12 @@ export class SuperadminService {
       hotel.description = payload.description;
       await queryRunner.manager.getRepository(Hotel).save(hotel);
 
-
       // create document details of the Hotel Admin
       await queryRunner.manager.getRepository(HotelAdminDocumentDetails).save({
         ...payload,
         user_id: hotel_admin.id,
         hotel_id: hotel.id,
       });
-
 
       // create bank details of the Hotel Admin
       await queryRunner.manager.getRepository(HotelAdminPaymentDetails).save({
@@ -162,7 +159,6 @@ export class SuperadminService {
         ...res,
       });
 
-
       sendMail({
         to: payload.email,
         subject: 'Login Credentials',
@@ -174,7 +170,6 @@ export class SuperadminService {
         }),
       });
 
-
       const title = 'Your Hotel is Listed.';
       const body = `A Hotel ${hotel.name} is Listed by Admin.`;
 
@@ -185,12 +180,10 @@ export class SuperadminService {
         notification_type: NotificationType.message,
       });
 
-
       await this.firebaseService.sendPushNotifications([hotel_admin.id], {
         title,
         body,
       });
-
 
       await queryRunner.commitTransaction();
 
@@ -320,7 +313,6 @@ export class SuperadminService {
 
       // Save the updated hotel entity
       await this.dataSource.getRepository(Hotel).save(hotel);
-
       const title = 'Hotel Approved';
       const body = `You hotel has been approved by admin.`;
 

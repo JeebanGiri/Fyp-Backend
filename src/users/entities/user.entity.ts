@@ -108,7 +108,7 @@ export class User {
   @OneToOne(
     () => HotelAdminPaymentDetails,
     (hoteladminpaymentdetails) => hoteladminpaymentdetails.user,
-    { cascade: true, onDelete: 'CASCADE' },
+    { cascade: true },
   )
   @JoinColumn({ name: 'payment_id' })
   hoteladminpaymentdetails: HotelAdminPaymentDetails;
@@ -119,7 +119,7 @@ export class User {
   @OneToOne(
     () => HotelAdminDocumentDetails,
     (hote_admin_document_details) => hote_admin_document_details.user,
-    { cascade: true, onDelete: 'CASCADE' },
+    { cascade: true },
   )
   @JoinColumn({ name: 'document_details_id' })
   document_detail: HotelAdminDocumentDetails;

@@ -127,12 +127,10 @@ export class SuperadminController {
     summary: 'Register a Hotel',
     description: `${UserRole.super_admin}`,
   })
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.super_admin)
   @ApiBearerAuth('JWT-auth')
   approveHotelDetails(@Param('id') id: string) {
-    console.log(id, 'hotel id');
-
     return this.superAdminService.approveHotelAdminDetails(id);
   }
 
