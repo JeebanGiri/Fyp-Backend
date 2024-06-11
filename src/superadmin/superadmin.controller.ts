@@ -156,6 +156,7 @@ export class SuperadminController {
   getHotelTotal() {
     return this.superAdminService.getTotalHotel();
   }
+
   //-----------GET RESERVATION COUNT (SEUPER ADMIN)--------------
   @Get('reservation/total')
   @ApiOperation({
@@ -187,6 +188,8 @@ export class SuperadminController {
   getAllHotels(@Query('page') page: number, @Query('limit') limit: number) {
     return this.superAdminService.findAllHotels({ page, limit });
   }
+
+  
 
   // -----------DELETE HOTEL BY ID--------------
   @Delete(':hotel_id')
