@@ -34,7 +34,7 @@ export class ReservationService {
   private paymentLinkExpirationTime: number;
 
   constructor(private dataSource: DataSource) {}
-  
+
   async makeHotelRoomsReservation(
     loggedUser: User,
     hotel_id: string,
@@ -110,17 +110,15 @@ export class ReservationService {
         }),
       });
 
-
-      console.log(reservation.id);      
-      
       // Create Khalti payment
       const formData = {
         return_url: 'http://localhost:5173/my-reservation',
         website_url: 'http://localhost:5173',
-        amount: 1000,
+        amount: total_amount,
         purchase_order_id: reservation.id,
         purchase_order_name: 'Hotel Reservation',
       };
+      console.log('reach here');
 
       const redirect = await this.callKhalti(formData);
 
