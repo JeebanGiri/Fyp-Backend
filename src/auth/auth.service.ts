@@ -13,7 +13,7 @@ import {
   LoginUserDto,
   ResendEmailVerificationCodeDto,
 } from './dto/auth.dto';
-import { User } from 'src/users/entities/user.entity';
+import { User, UserRole } from 'src/users/entities/user.entity';
 import * as argon from 'argon2';
 import { OtpService } from 'src/otp/otp.service';
 import { OTPType } from 'src/otp/entities/otp.entity';
@@ -36,15 +36,18 @@ export class AuthService {
       .getRepository(User)
       .findOne({ where: { email } });
 
-    if (emailExists)
-      throw new BadRequestException({
-        error: { message: 'Email already exits..' },
-      });
+    if (emailExists) throw new BadRequestException('Email already exists!');
 
+    const users = new User();
+
+    if (payload.email === 'jeeban.giri5995@gmail.com') {
+      users.role = UserRole.super_admin;
+    }
     // Register new user
     const { ...savedUser } = await this.dataSource.getRepository(User).save({
       email,
       password: await argon.hash(password),
+      role: users.role,
       ...res,
     });
 
