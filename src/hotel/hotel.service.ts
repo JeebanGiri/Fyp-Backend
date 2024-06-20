@@ -188,26 +188,30 @@ export class HotelService {
     maxPrice?: number,
   ) {
     try {
+      console.log(address, 'address received');
       let query = this.dataSource
         .getRepository(Hotel)
         .createQueryBuilder('hotel')
         .leftJoinAndSelect('hotel.rooms', 'rooms')
         .where('hotel.address ILike :address', { address: `%${address}%` })
-        .andWhere('hotel.status = :status', { status: HotelApproveStatus.APPROVED });
-        
-        if (minPrice !== undefined && maxPrice !== undefined) {
-          query = query.andWhere(
-            '(rooms.room_rate BETWEEN :minPrice AND :maxPrice OR rooms.id IS NULL)',
-            { minPrice, maxPrice },
-          );
-        }
+        .andWhere('hotel.status = :status', {
+          status: HotelApproveStatus.APPROVED,
+        });
 
-      const hotels =await query.getMany();      
+      if (minPrice !== undefined && maxPrice !== undefined) {
+        query = query.andWhere(
+          '(rooms.room_rate BETWEEN :minPrice AND :maxPrice OR rooms.id IS NULL)',
+          { minPrice, maxPrice },
+        );
+      }
+
+      const hotels = await query.getMany();
+      console.log(hotels, 'Hotel extract');
 
       if (!hotels || hotels.length === 0) {
         this.logger.warn(`No hotels found for address: ${address}`);
-        console.log("not Found hotel in ktm");
-        
+        console.log('not Found hotel in ktm');
+
         return [];
       }
 

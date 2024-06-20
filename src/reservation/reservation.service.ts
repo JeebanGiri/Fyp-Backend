@@ -51,6 +51,18 @@ export class ReservationService {
     await queryRunner.startTransaction();
     try {
       const { email, confirm_email } = payload;
+      console.log(
+        hotel_id,
+        room_id,
+        room_type,
+        room_quantity,
+        total_amount,
+        checkInDate,
+        checkOutDate,
+        'from frontend',
+      );
+      console.log(payload);
+
       if (!loggedUser)
         throw new UnauthorizedException(
           'Please login first to find best accommodation?',
