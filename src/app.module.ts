@@ -32,6 +32,7 @@ import { FirebaseModule } from './firebase/firebase.module';
 import { CronModule } from './@cron/cron.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { RatingModule } from './rating/rating.module';
+import Stripe from 'stripe';
 
 @Module({
   imports: [
@@ -73,6 +74,7 @@ import { RatingModule } from './rating/rating.module';
     SocketService,
     HotelAdminService,
     JwtService,
+    Stripe
   ],
 })
 export class AppModule {}

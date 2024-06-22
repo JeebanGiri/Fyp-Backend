@@ -5,15 +5,17 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-export enum PaymentType {
+export enum PaymentGateway {
   KHALTI = 'KHALTI',
   ESEWA = 'ESEWA',
   STRIPE = 'STRIPE',
 }
+
 export enum PaymentStatus {
   PENDING = 'PENDING',
-  COMPLETED = 'COMPLETEd',
+  COMPLETED = 'COMPLETED',
 }
+
 @Entity('payment')
 export class Payment {
   @PrimaryGeneratedColumn('uuid')
@@ -31,8 +33,12 @@ export class Payment {
   @Column({ type: 'varchar' })
   khalti_mobile: string;
 
-  @Column({ type: 'enum', enum: PaymentType, default: PaymentType.KHALTI })
-  payment_type: PaymentType;
+  @Column({
+    type: 'enum',
+    enum: PaymentGateway,
+    default: PaymentGateway.KHALTI,
+  })
+  payment_type: PaymentGateway;
 
   @Column({ type: 'enum', enum: PaymentStatus, default: PaymentStatus.PENDING })
   payment_status: PaymentStatus;
@@ -40,5 +46,6 @@ export class Payment {
   @CreateDateColumn()
   createAt: Date;
 
-  
+  @Column({ type: 'varchar', nullable: true })
+  stripe_payment_intent_id: string;
 }

@@ -23,6 +23,7 @@ import {
   CreateReservationDto,
   UpdateReservationDto,
 } from './dto/reservation.dto';
+import { PaymentGateway } from 'src/payment/entities/payment.entity';
 
 @ApiTags('Reservation')
 @Controller('reservation')
@@ -50,6 +51,7 @@ export class ReservationController {
     @Param('check_in_date') checkInDate: string,
     @Param('check_out_date') checkOutDate: string,
     @Body() payload: CreateReservationDto,
+    @Body() paymentGateway: PaymentGateway,
   ) {
     return this.reservationService.makeHotelRoomsReservation(
       user,
@@ -61,6 +63,7 @@ export class ReservationController {
       checkInDate,
       checkOutDate,
       payload,
+      paymentGateway,
     );
   }
 

@@ -8,6 +8,8 @@ export const NODE_ENV = process.env.ENV;
 export const JWT_SECRET = process.env.JWT_SECRET!;
 
 export const KHALTI_SECRET_KEY = process.env.KHALTI_SECRET_KEY;
+export const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
+
   
 export const BASE_URL = {
   frontend: process.env.FRONTEND_URL,
