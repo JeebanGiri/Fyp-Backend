@@ -51,8 +51,9 @@ export class ReservationController {
     @Param('check_in_date') checkInDate: string,
     @Param('check_out_date') checkOutDate: string,
     @Body() payload: CreateReservationDto,
-    @Body() paymentGateway: PaymentGateway,
   ) {
+    console.log(payload, 'payload from controller');
+
     return this.reservationService.makeHotelRoomsReservation(
       user,
       hotel_id,
@@ -63,7 +64,6 @@ export class ReservationController {
       checkInDate,
       checkOutDate,
       payload,
-      paymentGateway,
     );
   }
 

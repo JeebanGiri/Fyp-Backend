@@ -183,7 +183,6 @@ export class ReservationService {
     checkInDate: string,
     checkOutDate: string,
     payload: CreateReservationDto,
-    paymentGateway: PaymentGateway,
   ) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -271,9 +270,8 @@ export class ReservationService {
 
       let paymentUrl;
 
-      if (paymentGateway === PaymentGateway.KHALTI) {
-        console.log('called Khalti ');
-
+      if (payload.paymentGateway === PaymentGateway.KHALTI) {
+        
         const formData = {
           return_url: 'http://localhost:5173/my-reservation',
           website_url: 'http://localhost:5173',
@@ -291,7 +289,7 @@ export class ReservationService {
           payment_status: PaymentStatus.COMPLETED,
           reservation_id: reservation.id,
         });
-      } else if (paymentGateway === PaymentGateway.STRIPE) {
+      } else if (payload.paymentGateway === PaymentGateway.STRIPE) {
         const session = await this.stripe.checkout.sessions.create({
           payment_method_types: ['card'],
           line_items: [

@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsDateString,
   IsEmail,
+  IsEnum,
   IsIn,
   IsNotEmpty,
   IsOptional,
@@ -12,6 +13,7 @@ import {
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { ReservationStatus } from '../entities/reservation.entity';
+import { PaymentGateway } from 'src/payment/entities/payment.entity';
 
 export class CreateReservationDto {
   @ApiProperty({ example: 'Jeeban G' })
@@ -54,6 +56,10 @@ export class CreateReservationDto {
   @IsString()
   @MaxLength(500)
   cancel_reason?: string;
+
+  @ApiProperty({ example: 'KHALTI', enum: PaymentGateway })
+  @IsEnum(PaymentGateway)
+  paymentGateway: PaymentGateway;
 }
 
 export class UpdateReservationDto {
@@ -120,4 +126,3 @@ export class CancelReservationDto {
   @IsOptional()
   reason: string;
 }
-
