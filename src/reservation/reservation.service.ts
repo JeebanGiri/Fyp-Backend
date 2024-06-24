@@ -44,135 +44,6 @@ export class ReservationService {
     this.stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: '2024-04-10' });
   }
 
-  // async makeHotelRoomsReservation(
-  //   loggedUser: User,
-  //   hotel_id: string,
-  //   room_id: string,
-  //   room_type: string,
-  //   room_quantity: number,
-  //   total_amount: number,
-  //   checkInDate: string,
-  //   checkOutDate: string,
-  //   payload: CreateReservationDto,
-  //   paymentGateway: PaymentGateway,
-  // ) {
-  //   const queryRunner = this.dataSource.createQueryRunner();
-  //   await queryRunner.connect();
-  //   await queryRunner.startTransaction();
-  //   try {
-  //     const { email, confirm_email } = payload;
-
-  //     if (!loggedUser)
-  //       throw new UnauthorizedException(
-  //         'Please login first to find best accommodation?',
-  //       );
-  //     if (!payload.full_name)
-  //       throw new BadRequestException('Please provide your full name');
-  //     if (!payload.country)
-  //       throw new BadRequestException('Please provide your residence');
-  //     if (!email && !confirm_email)
-  //       throw new BadRequestException('Please Provide your Email');
-  //     if (email != confirm_email) {
-  //       throw new BadRequestException("Email doesn't match");
-  //     }
-
-  //     // Check if the hotel exits
-  //     const hotel = await this.dataSource
-  //       .getRepository(Hotel)
-  //       .findOne({ where: { id: hotel_id } });
-
-  //     if (!hotel) throw new NotFoundException('Hotel Not Found...');
-
-  //     // check if the room exits
-  //     const rooms = await queryRunner.manager
-  //       .getRepository(Rooms)
-  //       .findOne({ where: { id: room_id } });
-
-  //     if (!rooms) throw new NotFoundException('Room Not Availiable');
-
-  //     // Assign the user's email to the user_email property
-
-  //     const user_email = email.toLowerCase();
-
-  //     const reservation = await queryRunner.manager
-  //       .getRepository(Reservation)
-  //       .save({
-  //         ...payload,
-  //         user_email: user_email,
-  //         total_amount: total_amount,
-  //         check_In_Date: checkInDate,
-  //         check_Out_Date: checkOutDate,
-  //         user_id: loggedUser.id,
-  //         room_type: room_type,
-  //         room_quantity: room_quantity,
-  //         hotel_id: hotel.id,
-  //         room_id: rooms.id,
-  //       });
-
-  //     // -----------SEND MAIL IF BOOKING SUCCESSFULL----------------
-  //     sendMail({
-  //       to: payload.email,
-  //       subject: 'Booking Sucessfull',
-  //       html: defaultMailTemplate({
-  //         title: 'Booking message',
-  //         name: payload.full_name,
-  //         message: `Your reservation is made successf ully!. <br/>
-  //          Please continue your reservation process by making payment processing....`,
-  //       }),
-  //     });
-
-  //     // Create Khalti payment
-  //     const formData = {
-  //       return_url: 'http://localhost:5173/my-reservation',
-  //       website_url: 'http://localhost:5173',
-  //       amount: total_amount,
-  //       purchase_order_id: reservation.id,
-  //       purchase_order_name: 'Hotel Reservation',
-  //     };
-
-  //     const redirect = await this.callKhalti(formData);
-
-  //     await queryRunner.manager.getRepository(Payment).save({
-  //       amount: formData.amount,
-  //       khalti_token: '',
-  //       khalti_mobile: '',
-  //       payment_type: PaymentGateway.KHALTI,
-  //       payment_status: PaymentStatus.COMPLETED,
-  //       reservation_id: reservation.id,
-  //       total_amount: total_amount + formData.amount,
-  //     });
-
-  //     reservation.status = ReservationStatus.APPROVED;
-  //     // Logging after reservation approval
-
-  //     // -----------SEND MAIL AFTER PAYMENT SUCCESSFULL----------------
-  //     sendMail({
-  //       to: reservation.email,
-  //       subject: 'Booking Sucessfull',
-  //       html: defaultMailTemplate({
-  //         title: 'Booking message',
-  //         name: payload.full_name,
-  //         message: `Your reservation is made successfully in ${hotel.name}`,
-  //       }),
-  //     });
-
-  //     await queryRunner.manager.getRepository(Reservation).save(reservation);
-  //     await queryRunner.commitTransaction();
-  //     return {
-  //       message: 'Booked Sucessfully',
-  //       reservation: reservation,
-  //       redirect,
-  //     };
-  //   } catch (error: any) {
-  //     // Rollback the transaction in case of an error
-  //     await queryRunner.rollbackTransaction();
-  //     throw new BadRequestException(error.message);
-  //   } finally {
-  //     // Release the query runner resources
-  //     await queryRunner.release();
-  //   }
-  // }
-
   async makeHotelRoomsReservation(
     loggedUser: User,
     hotel_id: string,
@@ -189,6 +60,7 @@ export class ReservationService {
     await queryRunner.startTransaction();
     try {
       const { email, confirm_email } = payload;
+
       if (!loggedUser)
         throw new UnauthorizedException(
           'Please login first to find best accommodation?',
@@ -218,6 +90,7 @@ export class ReservationService {
       if (!rooms) throw new NotFoundException('Room Not Availiable');
 
       // Assign the user's email to the user_email property
+
       const user_email = email.toLowerCase();
 
       const reservation = await queryRunner.manager
@@ -247,81 +120,33 @@ export class ReservationService {
         }),
       });
 
-      // // Create Khalti payment
-      // const formData = {
-      //   return_url: 'http://localhost:5173/my-reservation',
-      //   website_url: 'http://localhost:5173',
-      //   amount: total_amount,
-      //   purchase_order_id: reservation.id,
-      //   purchase_order_name: 'Hotel Reservation',
-      // };
+      // ----------_Remaining things to add this----------
+      // if (payload.paymentGateway === PaymentGateway.KHALTI) {
 
-      // const redirect = await this.callKhalti(formData);
+      // }
+      // else if (payload.paymentGateway === PaymentGateway.STRIPE) {
 
-      // await queryRunner.manager.getRepository(Payment).save({
-      //   amount: formData.amount,
-      //   khalti_token: '',
-      //   khalti_mobile: '',
-      //   payment_type: PaymentGateway.KHALTI,
-      //   payment_status: PaymentStatus.COMPLETED,
-      //   reservation_id: reservation.id,
-      //   total_amount: total_amount + formData.amount,
-      // });
+      // }
+      // Create Khalti payment
+      const formData = {
+        return_url: 'http://localhost:5173/my-reservation',
+        website_url: 'http://localhost:5173',
+        amount: total_amount,
+        purchase_order_id: reservation.id,
+        purchase_order_name: 'Hotel Reservation',
+      };
 
-      let paymentUrl;
+      let redirect = await this.callKhalti(formData);
 
-      if (payload.paymentGateway === PaymentGateway.KHALTI) {
-        
-        const formData = {
-          return_url: 'http://localhost:5173/my-reservation',
-          website_url: 'http://localhost:5173',
-          amount: total_amount * 100, // Convert to paisa for Khalti
-          purchase_order_id: reservation.id,
-          purchase_order_name: 'Hotel Reservation',
-        };
-        paymentUrl = await this.callKhalti(formData);
-
-        await queryRunner.manager.getRepository(Payment).save({
-          amount: formData.amount,
-          khalti_token: '',
-          khalti_mobile: '',
-          payment_type: PaymentGateway.KHALTI,
-          payment_status: PaymentStatus.COMPLETED,
-          reservation_id: reservation.id,
-        });
-      } else if (payload.paymentGateway === PaymentGateway.STRIPE) {
-        const session = await this.stripe.checkout.sessions.create({
-          payment_method_types: ['card'],
-          line_items: [
-            {
-              price_data: {
-                currency: 'usd',
-                product_data: {
-                  name: 'Hotel Reservation',
-                },
-                unit_amount: total_amount * 100, // Stripe expects the amount in cents
-              },
-              quantity: 1,
-            },
-          ],
-          mode: 'payment',
-          success_url: 'http://localhost:5173/my-reservation',
-          cancel_url: 'http://localhost:5173/cancel',
-          metadata: {
-            reservation_id: reservation.id,
-          },
-        });
-
-        paymentUrl = session.url;
-
-        // stripe_payment_intent_id: session.payment_intent,
-        await queryRunner.manager.getRepository(Payment).save({
-          amount: total_amount,
-          payment_type: PaymentGateway.STRIPE,
-          payment_status: PaymentStatus.COMPLETED,
-          reservation_id: reservation.id,
-        });
-      }
+      await queryRunner.manager.getRepository(Payment).save({
+        amount: formData.amount,
+        khalti_token: '',
+        khalti_mobile: '',
+        payment_type: PaymentGateway.KHALTI,
+        payment_status: PaymentStatus.COMPLETED,
+        reservation_id: reservation.id,
+        total_amount: total_amount + formData.amount,
+      });
 
       reservation.status = ReservationStatus.APPROVED;
       // Logging after reservation approval
@@ -342,8 +167,7 @@ export class ReservationService {
       return {
         message: 'Booked Sucessfully',
         reservation: reservation,
-        // redirect,
-        paymentUrl,
+        redirect,
       };
     } catch (error: any) {
       // Rollback the transaction in case of an error
@@ -354,6 +178,188 @@ export class ReservationService {
       await queryRunner.release();
     }
   }
+
+  // async makeHotelRoomsReservation(
+  //   loggedUser: User,
+  //   hotel_id: string,
+  //   room_id: string,
+  //   room_type: string,
+  //   room_quantity: number,
+  //   total_amount: number,
+  //   checkInDate: string,
+  //   checkOutDate: string,
+  //   payload: CreateReservationDto,
+  // ) {
+  //   const queryRunner = this.dataSource.createQueryRunner();
+  //   await queryRunner.connect();
+  //   await queryRunner.startTransaction();
+  //   try {
+  //     let payment_url: any;
+  //     const { email, confirm_email } = payload;
+  //     if (!loggedUser)
+  //       throw new UnauthorizedException(
+  //         'Please login first to find best accommodation?',
+  //       );
+  //     if (!payload.full_name)
+  //       throw new BadRequestException('Please provide your full name');
+  //     if (!payload.country)
+  //       throw new BadRequestException('Please provide your residence');
+  //     if (!email && !confirm_email)
+  //       throw new BadRequestException('Please Provide your Email');
+  //     if (email != confirm_email) {
+  //       throw new BadRequestException("Email doesn't match");
+  //     }
+
+  //     // Check if the hotel exits
+  //     const hotel = await this.dataSource
+  //       .getRepository(Hotel)
+  //       .findOne({ where: { id: hotel_id } });
+
+  //     if (!hotel) throw new NotFoundException('Hotel Not Found...');
+
+  //     // check if the room exits
+  //     const rooms = await queryRunner.manager
+  //       .getRepository(Rooms)
+  //       .findOne({ where: { id: room_id } });
+
+  //     if (!rooms) throw new NotFoundException('Room Not Availiable');
+
+  //     // Assign the user's email to the user_email property
+  //     const user_email = email.toLowerCase();
+
+  //     const reservation = await queryRunner.manager
+  //       .getRepository(Reservation)
+  //       .save({
+  //         ...payload,
+  //         user_email: user_email,
+  //         total_amount: total_amount,
+  //         check_In_Date: checkInDate,
+  //         check_Out_Date: checkOutDate,
+  //         user_id: loggedUser.id,
+  //         room_type: room_type,
+  //         room_quantity: room_quantity,
+  //         hotel_id: hotel.id,
+  //         room_id: rooms.id,
+  //       });
+
+  //     // -----------SEND MAIL IF BOOKING SUCCESSFULL----------------
+  //     sendMail({
+  //       to: payload.email,
+  //       subject: 'Booking Sucessfull',
+  //       html: defaultMailTemplate({
+  //         title: 'Booking message',
+  //         name: payload.full_name,
+  //         message: `Your reservation is made successf ully!. <br/>
+  //          Please continue your reservation process by making payment processing....`,
+  //       }),
+  //     });
+
+  //     if (payload.paymentGateway === PaymentGateway.KHALTI) {
+  //       // Create Khalti payment
+  //       const formData = {
+  //         return_url: 'http://localhost:5173/my-reservation',
+  //         website_url: 'http://localhost:5173',
+  //         amount: total_amount,
+  //         purchase_order_id: reservation.id,
+  //         purchase_order_name: 'Test',
+  //         customer_info: {
+  //           name: 'Test User',
+  //           email: 'test@khalti.com',
+  //           phone: '9800000001',
+  //         },
+  //       };
+
+  //       let redirect = await this.callKhalti(formData);
+
+  //       try {
+  //         await this.dataSource
+  //           .getRepository(Reservation)
+  //           .update({ id: reservation.id }, { hasCustomerPaid: true });
+
+  //         await queryRunner.manager.getRepository(Payment).save({
+  //           amount: total_amount,
+  //           khalti_token: '',
+  //           khalti_mobile: '',
+  //           payment_type: PaymentGateway.KHALTI,
+  //           payment_status: PaymentStatus.COMPLETED,
+  //         });
+  //         await queryRunner.commitTransaction();
+  //         console.log(payment_url, 'Payment url in line 300');
+
+  //         return {
+  //           message: 'Book Successfully',
+  //           payment_url,
+  //           redirect,
+  //         };
+  //       } catch (error) {
+  //         console.log(error);
+  //         await queryRunner.rollbackTransaction();
+  //         throw new BadRequestException('Khalti payment failed');
+  //       }
+  //     } else if (payload.paymentGateway === PaymentGateway.STRIPE) {
+  //       const session = await this.stripe.checkout.sessions.create({
+  //         payment_method_types: ['card'],
+  //         line_items: [
+  //           {
+  //             price_data: {
+  //               currency: 'usd',
+  //               product_data: {
+  //                 name: 'Hotel Reservation',
+  //               },
+  //               unit_amount: total_amount * 100, // Stripe expects the amount in cents
+  //             },
+  //             quantity: 1,
+  //           },
+  //         ],
+  //         mode: 'payment',
+  //         success_url: 'http://localhost:5173/my-reservation',
+  //         cancel_url: 'http://localhost:5173/cancel',
+  //         metadata: {
+  //           reservation_id: reservation.id,
+  //         },
+  //       });
+
+  //       payment_url = session.url;
+
+  //       // stripe_payment_intent_id: session.payment_intent,
+  //       await queryRunner.manager.getRepository(Payment).save({
+  //         amount: total_amount,
+  //         payment_type: PaymentGateway.STRIPE,
+  //         payment_status: PaymentStatus.COMPLETED,
+  //         reservation_id: reservation.id,
+  //       });
+  //     }
+
+  //     reservation.status = ReservationStatus.APPROVED;
+  //     // Logging after reservation approval
+
+  //     // -----------SEND MAIL AFTER PAYMENT SUCCESSFULL----------------
+  //     sendMail({
+  //       to: reservation.email,
+  //       subject: 'Booking Sucessfull',
+  //       html: defaultMailTemplate({
+  //         title: 'Booking message',
+  //         name: payload.full_name,
+  //         message: `Your reservation is made successfully in ${hotel.name}`,
+  //       }),
+  //     });
+
+  //     await queryRunner.manager.getRepository(Reservation).save(reservation);
+  //     // await queryRunner.commitTransaction();
+  //     return {
+  //       message: 'Booked Sucessfully',
+  //       reservation: reservation,
+  //       payment_url,
+  //     };
+  //   } catch (error: any) {
+  //     // Rollback the transaction in case of an error
+  //     await queryRunner.rollbackTransaction();
+  //     throw new BadRequestException(error.message);
+  //   } finally {
+  //     // Release the query runner resources
+  //     await queryRunner.release();
+  //   }
+  // }
 
   private async callKhalti(formData: any) {
     try {
@@ -419,6 +425,213 @@ export class ReservationService {
       );
     }
   }
+
+  // async makeHotelRoomsReservation(
+  //   loggedUser: User,
+  //   hotel_id: string,
+  //   room_id: string,
+  //   room_type: string,
+  //   room_quantity: number,
+  //   total_amount: number,
+  //   checkInDate: string,
+  //   checkOutDate: string,
+  //   payload: CreateReservationDto,
+  // ) {
+  //   const queryRunner = this.dataSource.createQueryRunner();
+  //   await queryRunner.connect();
+  //   await queryRunner.startTransaction();
+
+  //   try {
+  //     const { email, confirm_email } = payload;
+  //     if (!loggedUser) {
+  //       throw new UnauthorizedException(
+  //         'Please login first to find best accommodation',
+  //       );
+  //     }
+  //     if (!payload.full_name) {
+  //       throw new BadRequestException('Please provide your full name');
+  //     }
+  //     if (!payload.country) {
+  //       throw new BadRequestException('Please provide your residence');
+  //     }
+  //     if (!email || !confirm_email) {
+  //       throw new BadRequestException('Please Provide your Email');
+  //     }
+  //     if (email !== confirm_email) {
+  //       throw new BadRequestException("Email doesn't match");
+  //     }
+
+  //     // Check if the hotel exists
+  //     const hotel = await this.dataSource
+  //       .getRepository(Hotel)
+  //       .findOne({ where: { id: hotel_id } });
+  //     if (!hotel) throw new NotFoundException('Hotel Not Found');
+
+  //     // Check if the room exists
+  //     const rooms = await queryRunner.manager
+  //       .getRepository(Rooms)
+  //       .findOne({ where: { id: room_id } });
+  //     if (!rooms) throw new NotFoundException('Room Not Available');
+
+  //     // Assign the user's email to the user_email property
+  //     const user_email = email.toLowerCase();
+
+  //     const reservation = await queryRunner.manager
+  //       .getRepository(Reservation)
+  //       .save({
+  //         ...payload,
+  //         user_email: user_email,
+  //         total_amount: total_amount,
+  //         check_In_Date: checkInDate,
+  //         check_Out_Date: checkOutDate,
+  //         user_id: loggedUser.id,
+  //         room_type: room_type,
+  //         room_quantity: room_quantity,
+  //         hotel_id: hotel.id,
+  //         room_id: rooms.id,
+  //       });
+
+  //     // Send mail if booking successful
+  //     sendMail({
+  //       to: payload.email,
+  //       subject: 'Booking Successful',
+  //       html: defaultMailTemplate({
+  //         title: 'Booking message',
+  //         name: payload.full_name,
+  //         message: `Your reservation is made successfully!. <br/>
+  //          Please continue your reservation process by making payment processing....`,
+  //       }),
+  //     });
+
+  //     // Handle payment gateways
+  //     let paymentUrl: string;
+  //     if (payload.paymentGateway === PaymentGateway.KHALTI) {
+  //       paymentUrl = await this.processKhaltiPayment(reservation, total_amount);
+  //     } else if (payload.paymentGateway === PaymentGateway.STRIPE) {
+  //       paymentUrl = await this.processStripePayment(reservation, total_amount);
+  //     }
+
+  //     // Approve the reservation
+  //     reservation.status = ReservationStatus.APPROVED;
+
+  //     // Send mail after payment successful
+  //     sendMail({
+  //       to: reservation.email,
+  //       subject: 'Booking Successful',
+  //       html: defaultMailTemplate({
+  //         title: 'Booking message',
+  //         name: payload.full_name,
+  //         message: `Your reservation is made successfully in ${hotel.name}`,
+  //       }),
+  //     });
+
+  //     await queryRunner.manager.getRepository(Reservation).save(reservation);
+  //     await queryRunner.commitTransaction();
+
+  //     return {
+  //       message: 'Booked Successfully',
+  //       reservation: reservation,
+  //       payment_url: paymentUrl,
+  //     };
+  //   } catch (error: any) {
+  //     await queryRunner.rollbackTransaction();
+  //     throw new BadRequestException(error.message);
+  //   } finally {
+  //     await queryRunner.release();
+  //   }
+  // }
+
+  // private async processKhaltiPayment(
+  //   reservation: Reservation,
+  //   total_amount: number,
+  // ) {
+  //   // Use the existing payment link
+  //   try {
+  //     const headers = {
+  //       Authorization: `Key ${KHALTI_SECRET_KEY}`,
+  //       'Content-Type': 'application/json',
+  //     };
+
+  //     const res = await axios.post(
+  //       `https://a.khalti.com/api/v2/epayment/initiate/`,
+  //       {
+  //         return_url: 'http://localhost:5173/my-reservation',
+  //         website_url: 'http://localhost:5173',
+  //         amount: reservation.total_amount,
+  //         purchase_order_id: reservation.id,
+  //         purchase_order_name: 'Test',
+  //         customer_info: {
+  //           name: 'Test User',
+  //           email: 'test@khalti.com',
+  //           phone: '9800000001',
+  //         },
+  //       },
+  //       {
+  //         headers,
+  //       },
+  //     );
+
+  //     await this.dataSource
+  //       .getRepository(Reservation)
+  //       .update(
+  //         { id: reservation.id },
+  //         { paymentGatewayId: res.data.pidx, hasCustomerPaid: true },
+  //       );
+  //     await this.dataSource.getRepository(Payment).save({
+  //       amount: total_amount,
+  //       khalti_token: '',
+  //       khalti_mobile: '',
+  //       payment_type: PaymentGateway.KHALTI,
+  //       payment_status: PaymentStatus.COMPLETED,
+  //     });
+
+  //     return res.data.payment_url;
+  //   } catch (error) {
+  //     console.error(error);
+  //     throw new BadRequestException('Failed to process Khalti payment');
+  //   }
+  // }
+
+  // private async processStripePayment(
+  //   reservation: Reservation,
+  //   total_amount: number,
+  // ): Promise<string> {
+  //   try {
+  //     const session = await this.stripe.checkout.sessions.create({
+  //       payment_method_types: ['card'],
+  //       line_items: [
+  //         {
+  //           price_data: {
+  //             currency: 'usd',
+  //             product_data: {
+  //               name: 'Hotel Reservation',
+  //             },
+  //             unit_amount: total_amount * 100, // Stripe expects the amount in cents
+  //           },
+  //           quantity: 1,
+  //         },
+  //       ],
+  //       mode: 'payment',
+  //       success_url: 'http://localhost:5173/my-reservation',
+  //       cancel_url: 'http://localhost:5173/cancel',
+  //       metadata: {
+  //         reservation_id: reservation.id,
+  //       },
+  //     });
+
+  //     await this.dataSource.getRepository(Payment).save({
+  //       amount: total_amount,
+  //       payment_type: PaymentGateway.STRIPE,
+  //       payment_status: PaymentStatus.COMPLETED,
+  //       reservation_id: reservation.id,
+  //     });
+
+  //     return session.url;
+  //   } catch (error) {
+  //     console.error(error);
+  //     throw new BadRequestException('Failed to process Stripe payment');
+  //   }
+  // }
 
   // --------APPROVE RESERVATION--------------
   async approveRoomReservation(user: User, reservation_id: string) {
@@ -726,3 +939,24 @@ export class ReservationService {
     }
   }
 }
+
+// // Create Khalti payment
+// const formData = {
+//   return_url: 'http://localhost:5173/my-reservation',
+//   website_url: 'http://localhost:5173',
+//   amount: total_amount,
+//   purchase_order_id: reservation.id,
+//   purchase_order_name: 'Hotel Reservation',
+// };
+
+// const redirect = await this.callKhalti(formData);
+
+// await queryRunner.manager.getRepository(Payment).save({
+//   amount: formData.amount,
+//   khalti_token: '',
+//   khalti_mobile: '',
+//   payment_type: PaymentGateway.KHALTI,
+//   payment_status: PaymentStatus.COMPLETED,
+//   reservation_id: reservation.id,
+//   total_amount: total_amount + formData.amount,
+// });

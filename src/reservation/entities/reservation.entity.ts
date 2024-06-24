@@ -95,4 +95,10 @@ export class Reservation {
   @ManyToOne(() => Rooms, (rooms) => rooms.reservation, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'room_id' })
   rooms: Rooms;
+
+  @Column({ default: false, nullable: true })
+  hasCustomerPaid: boolean;
+
+  @Column({ nullable: true })
+  paymentGatewayId: string;
 }
