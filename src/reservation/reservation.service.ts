@@ -124,6 +124,7 @@ export class ReservationService {
       // if (payload.paymentGateway === PaymentGateway.KHALTI) {
 
       // }
+      
       // else if (payload.paymentGateway === PaymentGateway.STRIPE) {
 
       // }
