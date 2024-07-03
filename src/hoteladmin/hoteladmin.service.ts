@@ -177,6 +177,8 @@ export class HotelAdminService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
+      console.log(payload, 'payload data');
+
       if (!files)
         throw new BadRequestException('Upload "avatar"* and "cover" files');
 
@@ -223,7 +225,7 @@ export class HotelAdminService {
       hotel.phone_number = payload.phone_number;
       hotel.avatar = payload.avatar;
       hotel.documents = payload.documents;
-      hotel.is_verified = true;
+      hotel.is_verified = false;
       hotel.user_id = user.id;
       hotel.description = payload.description;
       await queryRunner.manager.getRepository(Hotel).save(hotel);

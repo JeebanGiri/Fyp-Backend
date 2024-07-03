@@ -40,7 +40,7 @@ export class AuthService {
 
     const users = new User();
 
-    if (payload.email === 'jeeban.giri5995@gmail.com') {
+    if (payload.email === 'np05cp4a210059@iic.edu.np') {
       users.role = UserRole.super_admin;
     }
     // Register new user
