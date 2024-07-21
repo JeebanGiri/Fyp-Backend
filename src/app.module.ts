@@ -74,7 +74,7 @@ import Stripe from 'stripe';
     SocketService,
     HotelAdminService,
     JwtService,
-    Stripe
+    Stripe,
   ],
 })
 export class AppModule {}

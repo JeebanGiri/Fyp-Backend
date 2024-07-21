@@ -35,7 +35,7 @@ import {
   UpdateHotelDto,
 } from './dto/hotel.dto';
 import { HotelService } from './hotel.service';
-
+ 
 const storage = {
   storage: diskStorage({
     destination: 'static/hotel',
