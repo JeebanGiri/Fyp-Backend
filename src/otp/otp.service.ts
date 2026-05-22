@@ -5,13 +5,13 @@ import { OTP, OTPType } from './entities/otp.entity';
 
 @Injectable()
 export class OtpService {
-  constructor(private dataSource: DataSource) {}
+  constructor(private dataSource: DataSource) { }
 
   async createOtp(user_id: string, type: OTPType) {
     // delete previous OTP if exists
     await this.dataSource.getRepository(OTP).delete({ user_id });
     console.log("Here");
-    
+
     const otp = new OTP();
 
     otp.code = await generateOTP(5); // generate random 5 digit code

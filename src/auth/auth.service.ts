@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -26,7 +27,7 @@ export class AuthService {
     private readonly dataSource: DataSource,
     private readonly jwtService: JwtService,
     private readonly otpService: OtpService,
-  ) {}
+  ) { }
 
   // ---------- REGISTER ----------
   async register(payload: CreateUserDto) {
@@ -36,7 +37,7 @@ export class AuthService {
       .getRepository(User)
       .findOne({ where: { email } });
 
-    if (emailExists) throw new BadRequestException('Email already exists!');
+    if (emailExists) throw new ConflictException('Email already exists!');
 
     const users = new User();
 
